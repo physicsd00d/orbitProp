@@ -1,0 +1,389 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      --><title>Hw8p2</title><meta name="generator" content="MATLAB 7.9"><meta name="date" content="2012-05-29"><meta name="m-file" content="Hw8p2"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Hw8.2</a></li><li><a href="#2">Part a.)</a></li><li><a href="#3">Part b.)</a></li><li><a href="#4">Part c.) See function statedot_oblate</a></li><li><a href="#5">Part d.)</a></li><li><a href="#6">Part e.)</a></li><li><a href="#7">Part f.)</a></li><li><a href="#8">Part g.)</a></li><li><a href="#9">Part h.)</a></li></ul></div><h2>Hw8.2<a name="1"></a></h2><pre class="codeinput">close <span class="string">all</span>; clear <span class="string">all</span>; clc;
+
+path(path,<span class="string">'Toolbox'</span>)
+
+DU = 6378.137;  <span class="comment">%km</span>
+TU = 806.80415; <span class="comment">%sec</span>
+VU = DU/TU;
+</pre><h2>Part a.)<a name="2"></a></h2><pre class="codeinput">o_R_s__eci = [0 16000 0]';  <span class="comment">%[km]</span>
+
+eci_V_s__eci = [-2.7338 0 2.7338]';     <span class="comment">%[km/s]</span>
+
+[a ecc inc raan aop nu0 meanmotion M0] = <span class="keyword">...</span>
+    getOrbitalElements(o_R_s__eci/DU,eci_V_s__eci/VU);
+
+<span class="comment">% convert back from canonical units</span>
+a = a*DU;   <span class="comment">%[km]</span>
+meanmotion = meanmotion/TU; <span class="comment">%[rad/sec]</span>
+
+<span class="comment">% From the words in the problem statement, I can see in my mind that</span>
+<span class="comment">% RAAN = 90 degrees</span>
+<span class="comment">% AoP = 180 degrees</span>
+
+disp([<span class="string">'Right Ascension  = '</span> num2str(raan*180/pi) <span class="string">' deg'</span>])
+disp([<span class="string">'Arg of Periapsis = '</span> num2str(aop*180/pi) <span class="string">' deg'</span>])
+disp([<span class="string">'Semi-major Axis  = '</span> num2str(a) <span class="string">' km'</span>])
+disp([<span class="string">'Eccentricity     = '</span> num2str(ecc) <span class="string">' '</span>])
+disp([<span class="string">'Inclination      = '</span> num2str(inc*180/pi) <span class="string">' deg'</span>])
+</pre><pre class="codeoutput">Right Ascension  = 90 deg
+Arg of Periapsis = 180 deg
+Semi-major Axis  = 11428.4239 km
+Eccentricity     = 0.40002 
+Inclination      = 45 deg
+</pre><h2>Part b.)<a name="3"></a></h2><pre class="codeinput">J2 = 1.0826e-3;
+
+dRAANdt_avg = -(3*meanmotion*J2*cos(inc)/2)*(DU/(a*(1-ecc^2)))^2; <span class="comment">%[deg/sec]</span>
+dAOPdt_avg = (3*meanmotion*J2/2) * (DU/(a*(1-ecc^2)))^2 * (2 - 5*sin(inc)^2/2); <span class="comment">%[deg/sec]</span>
+
+raan_24hrs = raan + dRAANdt_avg*3600*24;
+aop_24hrs = aop + dAOPdt_avg*3600*24;
+
+disp([<span class="string">'Average Nodal Regression  = '</span> num2str(dRAANdt_avg*180/pi) <span class="string">' deg/sec'</span>])
+disp([<span class="string">'Average Apsidal Rotation  = '</span> num2str(dAOPdt_avg*180/pi) <span class="string">' deg/sec'</span>])
+disp([<span class="string">'Right Ascension + 24hrs   = '</span> num2str(raan_24hrs*180/pi) <span class="string">' deg'</span>])
+disp([<span class="string">'Arg of Periapsis + 24hrs  = '</span> num2str(aop_24hrs*180/pi) <span class="string">' deg'</span>])
+</pre><pre class="codeoutput">Average Nodal Regression  = -1.5008e-05 deg/sec
+Average Apsidal Rotation  = 1.5919e-05 deg/sec
+Right Ascension + 24hrs   = 88.7033 deg
+Arg of Periapsis + 24hrs  = 181.3754 deg
+</pre><h2>Part c.) See function statedot_oblate<a name="4"></a></h2><h2>Part d.)<a name="5"></a></h2><pre class="codeinput">t_vec = 0:60:3600*24;   <span class="comment">%one day, one minute time steps</span>
+
+state0 = [o_R_s__eci; eci_V_s__eci];
+
+options = odeset(<span class="string">'RelTol'</span>, 1e-6, <span class="string">'AbsTol'</span>, 1e-9);
+[t_out, state] = ode113(@statedot_oblate, t_vec, state0, options);
+
+O_r_S__eci = state(:,1:3);
+
+[xeplot, yeplot, zeplot] = ellipsoid(0.0, 0.0, 0.0, <span class="keyword">...</span><span class="comment">  % earth sphere</span>
+                           DU, DU, DU, 30);
+
+<span class="comment">% Setup earth plotting data</span>
+figure(1)
+surface(xeplot, yeplot, zeplot, <span class="string">'FaceColor'</span>, <span class="string">'blue'</span>, <span class="string">'EdgeColor'</span>, <span class="string">'black'</span>);
+hold <span class="string">on</span>;
+
+plot3(O_r_S__eci(:,1), <span class="keyword">...</span>
+      O_r_S__eci(:,2), <span class="keyword">...</span>
+      O_r_S__eci(:,3), <span class="string">'red'</span>);
+
+view(3)
+
+axis <span class="string">equal</span>;
+title(<span class="string">'Orbit with J2 effect'</span>)
+xlabel(<span class="string">'x [km]'</span>)
+ylabel(<span class="string">'y [km]'</span>)
+zlabel(<span class="string">'z [km]'</span>)
+</pre><img vspace="5" hspace="5" src="Hw8p2_01.png" alt=""> <h2>Part e.)<a name="6"></a></h2><pre class="codeinput">eci_v_S__eci = state(:,4:6);
+
+num_steps = length(t_vec);
+OrbElements = zeros(num_steps,8);
+
+<span class="comment">% Get all the osculating orbital elements</span>
+<span class="keyword">for</span> i=1:num_steps
+    [a ecc inc raan aop nu0 meanmotion M0] = <span class="keyword">...</span>
+        getOrbitalElements(O_r_S__eci(i,:)/DU,eci_v_S__eci(i,:)/VU);
+
+    OrbElements(i,:) = [a ecc inc raan aop nu0 meanmotion M0];
+<span class="comment">%         getOrbitalElements(O_r_S__eci(i,:)/DU,eci_v_S__eci(i,:)/VU);</span>
+<span class="keyword">end</span>
+</pre><h2>Part f.)<a name="7"></a></h2><pre class="codeinput">linear_raan = OrbElements(1,4) + dRAANdt_avg.*t_vec;
+
+figure(2)
+plot(t_vec,OrbElements(:,4)*180/pi,t_vec,linear_raan*180/pi,<span class="string">'--'</span>)
+legend(<span class="string">'True Regression'</span>,<span class="string">'Average Regression'</span>)
+title(<span class="string">'Nodal Regression vs Time'</span>)
+xlabel(<span class="string">'Time [sec]'</span>)
+ylabel(<span class="string">'Right Ascension [deg]'</span>)
+
+<span class="comment">% The simulated data appears to perfectly oscillate about the trendline</span>
+<span class="comment">% drawn by the average.  I would say that the simulated data matches the</span>
+<span class="comment">% predicted average very well.</span>
+</pre><img vspace="5" hspace="5" src="Hw8p2_02.png" alt=""> <h2>Part g.)<a name="8"></a></h2><pre class="codeinput">linear_aop = OrbElements(1,5) + dAOPdt_avg.*t_vec;
+
+figure(3)
+plot(t_vec,OrbElements(:,5)*180/pi,t_vec,linear_aop*180/pi,<span class="string">'--'</span>)
+legend(<span class="string">'True Rotation'</span>,<span class="string">'Average Rotation'</span>)
+title(<span class="string">'Apsidal Advance vs Time'</span>)
+xlabel(<span class="string">'Time [sec]'</span>)
+ylabel(<span class="string">'Argument of Periapsis [deg]'</span>)
+
+<span class="comment">% Again, even though the simulated data is going through some wacky motion,</span>
+<span class="comment">% it does so nicely about the predicted average.</span>
+</pre><img vspace="5" hspace="5" src="Hw8p2_03.png" alt=""> <h2>Part h.)<a name="9"></a></h2><pre class="codeinput">figure(4)
+plot(t_vec,OrbElements(:,1)*DU)
+title(<span class="string">'Semi-major Axis vs Time'</span>)
+xlabel(<span class="string">'Time [sec]'</span>)
+ylabel(<span class="string">'Semi-major Axis [km]'</span>)
+
+figure(5)
+plot(t_vec,OrbElements(:,2))
+title(<span class="string">'Eccentricity vs Time'</span>)
+xlabel(<span class="string">'Time [sec]'</span>)
+ylabel(<span class="string">'Eccentricity'</span>)
+
+figure(6)
+plot(t_vec,OrbElements(:,3)*180/pi)
+title(<span class="string">'Inlination Angle vs Time'</span>)
+xlabel(<span class="string">'Time [sec]'</span>)
+ylabel(<span class="string">'Inclination [deg]'</span>)
+
+<span class="comment">% These plots are roughly what I expected in that these quantities</span>
+<span class="comment">% oscillate in some manner, the shape of which I would not have been able</span>
+<span class="comment">% to predict, that is periodic such that the change averages out to zero</span>
+<span class="comment">% over a period.</span>
+</pre><img vspace="5" hspace="5" src="Hw8p2_04.png" alt=""> <img vspace="5" hspace="5" src="Hw8p2_05.png" alt=""> <img vspace="5" hspace="5" src="Hw8p2_06.png" alt=""> <p class="footer"><br>
+      Published with MATLAB&reg; 7.9<br></p></div><!--
+##### SOURCE BEGIN #####
+%% Hw8.2
+close all; clear all; clc;
+
+path(path,'Toolbox')
+
+DU = 6378.137;  %km
+TU = 806.80415; %sec
+VU = DU/TU;
+
+%% Part a.)
+o_R_s__eci = [0 16000 0]';  %[km]
+
+eci_V_s__eci = [-2.7338 0 2.7338]';     %[km/s]
+
+[a ecc inc raan aop nu0 meanmotion M0] = ...
+    getOrbitalElements(o_R_s__eci/DU,eci_V_s__eci/VU);
+
+% convert back from canonical units
+a = a*DU;   %[km]
+meanmotion = meanmotion/TU; %[rad/sec]
+
+% From the words in the problem statement, I can see in my mind that
+% RAAN = 90 degrees
+% AoP = 180 degrees
+
+disp(['Right Ascension  = ' num2str(raan*180/pi) ' deg'])
+disp(['Arg of Periapsis = ' num2str(aop*180/pi) ' deg'])
+disp(['Semi-major Axis  = ' num2str(a) ' km'])
+disp(['Eccentricity     = ' num2str(ecc) ' '])
+disp(['Inclination      = ' num2str(inc*180/pi) ' deg'])
+
+%% Part b.)
+
+J2 = 1.0826e-3;
+
+dRAANdt_avg = -(3*meanmotion*J2*cos(inc)/2)*(DU/(a*(1-ecc^2)))^2; %[deg/sec]
+dAOPdt_avg = (3*meanmotion*J2/2) * (DU/(a*(1-ecc^2)))^2 * (2 - 5*sin(inc)^2/2); %[deg/sec]
+
+raan_24hrs = raan + dRAANdt_avg*3600*24;
+aop_24hrs = aop + dAOPdt_avg*3600*24;
+
+disp(['Average Nodal Regression  = ' num2str(dRAANdt_avg*180/pi) ' deg/sec'])
+disp(['Average Apsidal Rotation  = ' num2str(dAOPdt_avg*180/pi) ' deg/sec'])
+disp(['Right Ascension + 24hrs   = ' num2str(raan_24hrs*180/pi) ' deg'])
+disp(['Arg of Periapsis + 24hrs  = ' num2str(aop_24hrs*180/pi) ' deg'])
+
+
+%% Part c.) See function statedot_oblate
+
+%% Part d.)
+
+t_vec = 0:60:3600*24;   %one day, one minute time steps
+
+state0 = [o_R_s__eci; eci_V_s__eci];
+
+options = odeset('RelTol', 1e-6, 'AbsTol', 1e-9);
+[t_out, state] = ode113(@statedot_oblate, t_vec, state0, options);
+
+O_r_S__eci = state(:,1:3);
+
+[xeplot, yeplot, zeplot] = ellipsoid(0.0, 0.0, 0.0, ...  % earth sphere
+                           DU, DU, DU, 30);
+                       
+% Setup earth plotting data
+figure(1)
+surface(xeplot, yeplot, zeplot, 'FaceColor', 'blue', 'EdgeColor', 'black');     
+hold on;
+
+plot3(O_r_S__eci(:,1), ...
+      O_r_S__eci(:,2), ...
+      O_r_S__eci(:,3), 'red');
+  
+view(3)
+
+axis equal;
+title('Orbit with J2 effect')
+xlabel('x [km]')
+ylabel('y [km]')
+zlabel('z [km]')
+
+%% Part e.)
+
+eci_v_S__eci = state(:,4:6);
+
+num_steps = length(t_vec);
+OrbElements = zeros(num_steps,8);
+
+% Get all the osculating orbital elements
+for i=1:num_steps
+    [a ecc inc raan aop nu0 meanmotion M0] = ...
+        getOrbitalElements(O_r_S__eci(i,:)/DU,eci_v_S__eci(i,:)/VU);
+    
+    OrbElements(i,:) = [a ecc inc raan aop nu0 meanmotion M0];
+%         getOrbitalElements(O_r_S__eci(i,:)/DU,eci_v_S__eci(i,:)/VU);
+end
+
+
+%% Part f.) 
+linear_raan = OrbElements(1,4) + dRAANdt_avg.*t_vec;
+
+figure(2)
+plot(t_vec,OrbElements(:,4)*180/pi,t_vec,linear_raan*180/pi,'REPLACE_WITH_DASH_DASH')
+legend('True Regression','Average Regression')
+title('Nodal Regression vs Time')
+xlabel('Time [sec]')
+ylabel('Right Ascension [deg]')
+
+% The simulated data appears to perfectly oscillate about the trendline
+% drawn by the average.  I would say that the simulated data matches the
+% predicted average very well.
+
+
+%% Part g.)
+
+linear_aop = OrbElements(1,5) + dAOPdt_avg.*t_vec;
+
+figure(3)
+plot(t_vec,OrbElements(:,5)*180/pi,t_vec,linear_aop*180/pi,'REPLACE_WITH_DASH_DASH')
+legend('True Rotation','Average Rotation')
+title('Apsidal Advance vs Time')
+xlabel('Time [sec]')
+ylabel('Argument of Periapsis [deg]')
+
+% Again, even though the simulated data is going through some wacky motion,
+% it does so nicely about the predicted average.
+
+%% Part h.)
+
+
+figure(4)
+plot(t_vec,OrbElements(:,1)*DU)
+title('Semi-major Axis vs Time')
+xlabel('Time [sec]')
+ylabel('Semi-major Axis [km]')
+
+figure(5)
+plot(t_vec,OrbElements(:,2))
+title('Eccentricity vs Time')
+xlabel('Time [sec]')
+ylabel('Eccentricity')
+
+figure(6)
+plot(t_vec,OrbElements(:,3)*180/pi)
+title('Inlination Angle vs Time')
+xlabel('Time [sec]')
+ylabel('Inclination [deg]')
+
+% These plots are roughly what I expected in that these quantities
+% oscillate in some manner, the shape of which I would not have been able
+% to predict, that is periodic such that the change averages out to zero
+% over a period.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>

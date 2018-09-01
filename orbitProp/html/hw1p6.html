@@ -1,0 +1,419 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      --><title>hw1p6</title><meta name="generator" content="MATLAB 7.9"><meta name="date" content="2012-04-12"><meta name="m-file" content="hw1p6"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">HW1 Prob 4</a></li><li><a href="#2">a.)</a></li><li><a href="#3">b.)</a></li><li><a href="#4">c.)</a></li><li><a href="#5">d.)</a></li><li><a href="#6">e.)</a></li></ul></div><h2>HW1 Prob 4<a name="1"></a></h2><pre class="codeinput">clear <span class="string">all</span>; close <span class="string">all</span>; clc;
+</pre><h2>a.)<a name="2"></a></h2><pre class="codeinput">p = 1;
+ecc = 0.7;
+
+nu = 1:360;
+r = p./(1 + ecc*cosd(nu));
+
+rp = r(end);
+ra = r(180);
+
+a = 0.5*(rp+ra);
+
+x = r.*cosd(nu);
+y = r.*sind(nu);
+
+figure(1)
+plot(x,y)
+hold <span class="string">on</span>
+plot([0 0],[0 p],<span class="string">'black'</span>)
+hold <span class="string">on</span>
+plot([x(end) (x(end)-a)], [0 0], <span class="string">'g'</span>)
+hold <span class="string">on</span>
+plot([0 x(end)],[0 y(end)],<span class="string">'r'</span>,<span class="string">'LineWidth'</span>,2)
+axis(<span class="string">'equal'</span>)
+title([<span class="string">'a.) ecc='</span> num2str(ecc) <span class="string">'  p=1  a='</span> num2str(a) <span class="string">'  rp='</span> num2str(rp)])
+
+figure(5)
+set(gcf, <span class="string">'Visible'</span>, <span class="string">'off'</span>)
+plot(x,y,<span class="string">'-'</span>,<span class="string">'LineWidth'</span>,2)
+legend(<span class="string">'0.7'</span>)
+</pre><img vspace="5" hspace="5" src="hw1p6_01.png" alt=""> <h2>b.)<a name="3"></a></h2><pre class="codeinput">clear <span class="string">all</span>;
+
+p = 1;
+ecc = 0.0;
+
+nu = 1:360;
+r = p./(1 + ecc*cosd(nu));
+
+rp = r(end);
+ra = r(180);
+
+a = 0.5*(rp+ra);
+
+x = r.*cosd(nu);
+y = r.*sind(nu);
+
+figure(2)
+plot(x,y)
+hold <span class="string">on</span>
+plot([0 0],[0 p],<span class="string">'black'</span>)
+hold <span class="string">on</span>
+plot([x(end) (x(end)-a)], [0 0], <span class="string">'g'</span>)
+hold <span class="string">on</span>
+plot([0 x(end)],[0 y(end)],<span class="string">'r'</span>,<span class="string">'LineWidth'</span>,2)
+axis(<span class="string">'equal'</span>)
+title([<span class="string">'b.) ecc='</span> num2str(ecc) <span class="string">'  p=1  a='</span> num2str(a) <span class="string">'  rp='</span> num2str(rp)])
+
+figure(5)
+set(gcf, <span class="string">'Visible'</span>, <span class="string">'off'</span>)
+hold <span class="string">on</span>
+plot(x,y,<span class="string">'-.'</span>,<span class="string">'LineWidth'</span>,2)
+legend(<span class="string">'0.7'</span>,<span class="string">'0.0'</span>)
+</pre><img vspace="5" hspace="5" src="hw1p6_02.png" alt=""> <h2>c.)<a name="4"></a></h2><pre class="codeinput">clear <span class="string">all</span>;
+
+p = 1;
+ecc = 2.2;
+
+<span class="comment">%turning angle</span>
+delta = 2*asind(1/ecc);
+nu_limit = (95);   <span class="comment">%actually equal to 90 + delta/2, but that's too big to plot nicely</span>
+
+th = (90 + delta/2)*ones(10,1);
+
+m = tand(90+delta/2);
+
+
+
+
+
+
+nu = [1:nu_limit NaN (360-nu_limit):360];
+r = p./(1 + ecc*cosd(nu));
+
+rp = p/(1+ecc);
+<span class="comment">% ra = r(180);</span>
+
+a = rp/(1-ecc);
+
+
+x_asym = -0.2:0.05:(rp-a);
+y_asym = m*x_asym - m*(rp-a);
+
+
+
+
+x = r.*cosd(nu);
+y = r.*sind(nu);
+
+figure(3)
+plot(x,y)
+hold <span class="string">on</span>
+plot([0 0],[0 p],<span class="string">'black'</span>)   <span class="comment">%p</span>
+hold <span class="string">on</span>
+plot([x(end) (x(end)-a)], [0 0], <span class="string">'g'</span>)   <span class="comment">%a</span>
+hold <span class="string">on</span>
+plot([0 x(end)],[0 y(end)],<span class="string">'r'</span>,<span class="string">'LineWidth'</span>,2)   <span class="comment">%rp</span>
+axis(<span class="string">'equal'</span>)
+hold <span class="string">on</span>
+plot(x_asym,y_asym,<span class="string">'--'</span>)  <span class="comment">%asymptote above</span>
+hold <span class="string">on</span>
+plot(x_asym,-y_asym,<span class="string">'--'</span>) <span class="comment">%asymptote below</span>
+title([<span class="string">'c.) ecc='</span> num2str(ecc) <span class="string">'  p=1  a='</span> num2str(a) <span class="string">'  rp='</span> num2str(rp)])
+
+figure(5)
+set(gcf, <span class="string">'Visible'</span>, <span class="string">'off'</span>)
+hold <span class="string">on</span>
+plot(x,y,<span class="string">'--'</span>,<span class="string">'LineWidth'</span>,2)
+</pre><img vspace="5" hspace="5" src="hw1p6_03.png" alt=""> <h2>d.)<a name="5"></a></h2><pre class="codeinput">clear <span class="string">all</span>;
+
+p = 1;
+ecc = 1.0;
+
+nu_limit = 110;
+nu = [1:nu_limit NaN (360-nu_limit):360];
+r = p./(1 + ecc*cosd(nu));
+
+rp = r(end);
+<span class="comment">% ra = r(180);</span>
+
+a = NaN;
+
+x = r.*cosd(nu);
+y = r.*sind(nu);
+
+figure(4)
+plot(x,y)
+hold <span class="string">on</span>
+plot([0 0],[0 p],<span class="string">'black'</span>)
+hold <span class="string">on</span>
+plot([x(end) (x(end)-a)], [0 0], <span class="string">'g'</span>)
+hold <span class="string">on</span>
+plot([0 x(end)],[0 y(end)],<span class="string">'r'</span>,<span class="string">'LineWidth'</span>,2)
+axis(<span class="string">'equal'</span>)
+title([<span class="string">'d.) ecc='</span> num2str(ecc) <span class="string">'  p=1  a='</span> num2str(a) <span class="string">'  rp='</span> num2str(rp)])
+
+figure(5)
+set(gcf, <span class="string">'Visible'</span>, <span class="string">'off'</span>)
+hold <span class="string">on</span>
+plot(x,y,<span class="string">':'</span>,<span class="string">'LineWidth'</span>,2)
+</pre><img vspace="5" hspace="5" src="hw1p6_04.png" alt=""> <h2>e.)<a name="6"></a></h2><pre class="codeinput">figure(5)
+hold <span class="string">on</span>
+scatter(0,0,<span class="string">'black'</span>,<span class="string">'filled'</span>)
+axis(<span class="string">'equal'</span>)
+legend(<span class="string">'0.7'</span>,<span class="string">'0.0'</span>,<span class="string">'2.2'</span>,<span class="string">'1.0'</span>)
+title(<span class="string">'e.) Composite Plot'</span>)
+</pre><img vspace="5" hspace="5" src="hw1p6_05.png" alt=""> <p class="footer"><br>
+      Published with MATLAB&reg; 7.9<br></p></div><!--
+##### SOURCE BEGIN #####
+%% HW1 Prob 4
+clear all; close all; clc;
+
+%% a.)
+p = 1;
+ecc = 0.7;
+
+nu = 1:360;
+r = p./(1 + ecc*cosd(nu));
+
+rp = r(end);
+ra = r(180);
+
+a = 0.5*(rp+ra);
+
+x = r.*cosd(nu);
+y = r.*sind(nu);
+
+figure(1)
+plot(x,y)
+hold on
+plot([0 0],[0 p],'black')
+hold on
+plot([x(end) (x(end)-a)], [0 0], 'g')
+hold on
+plot([0 x(end)],[0 y(end)],'r','LineWidth',2)
+axis('equal')
+title(['a.) ecc=' num2str(ecc) '  p=1  a=' num2str(a) '  rp=' num2str(rp)])
+
+figure(5)
+set(gcf, 'Visible', 'off') 
+plot(x,y,'-','LineWidth',2)
+legend('0.7')
+
+
+%% b.)
+clear all;
+
+p = 1;
+ecc = 0.0;
+
+nu = 1:360;
+r = p./(1 + ecc*cosd(nu));
+
+rp = r(end);
+ra = r(180);
+
+a = 0.5*(rp+ra);
+
+x = r.*cosd(nu);
+y = r.*sind(nu);
+
+figure(2)
+plot(x,y)
+hold on
+plot([0 0],[0 p],'black')
+hold on
+plot([x(end) (x(end)-a)], [0 0], 'g')
+hold on
+plot([0 x(end)],[0 y(end)],'r','LineWidth',2)
+axis('equal')
+title(['b.) ecc=' num2str(ecc) '  p=1  a=' num2str(a) '  rp=' num2str(rp)])
+
+figure(5)
+set(gcf, 'Visible', 'off') 
+hold on
+plot(x,y,'-.','LineWidth',2)
+legend('0.7','0.0')
+
+%% c.)
+clear all;
+
+p = 1;
+ecc = 2.2;
+
+%turning angle
+delta = 2*asind(1/ecc);
+nu_limit = (95);   %actually equal to 90 + delta/2, but that's too big to plot nicely
+
+th = (90 + delta/2)*ones(10,1);
+
+m = tand(90+delta/2);
+
+
+
+
+
+
+nu = [1:nu_limit NaN (360-nu_limit):360];
+r = p./(1 + ecc*cosd(nu));
+
+rp = p/(1+ecc);
+% ra = r(180);
+
+a = rp/(1-ecc);
+
+
+x_asym = -0.2:0.05:(rp-a);
+y_asym = m*x_asym - m*(rp-a);
+
+
+
+
+x = r.*cosd(nu);
+y = r.*sind(nu);
+
+figure(3)
+plot(x,y)
+hold on
+plot([0 0],[0 p],'black')   %p
+hold on
+plot([x(end) (x(end)-a)], [0 0], 'g')   %a
+hold on
+plot([0 x(end)],[0 y(end)],'r','LineWidth',2)   %rp
+axis('equal')
+hold on
+plot(x_asym,y_asym,'REPLACE_WITH_DASH_DASH')  %asymptote above
+hold on
+plot(x_asym,-y_asym,'REPLACE_WITH_DASH_DASH') %asymptote below
+title(['c.) ecc=' num2str(ecc) '  p=1  a=' num2str(a) '  rp=' num2str(rp)])
+
+figure(5)
+set(gcf, 'Visible', 'off') 
+hold on
+plot(x,y,'REPLACE_WITH_DASH_DASH','LineWidth',2)
+
+%% d.)
+clear all;
+
+p = 1;
+ecc = 1.0;
+
+nu_limit = 110;
+nu = [1:nu_limit NaN (360-nu_limit):360];
+r = p./(1 + ecc*cosd(nu));
+
+rp = r(end);
+% ra = r(180);
+
+a = NaN;
+
+x = r.*cosd(nu);
+y = r.*sind(nu);
+
+figure(4)
+plot(x,y)
+hold on
+plot([0 0],[0 p],'black')
+hold on
+plot([x(end) (x(end)-a)], [0 0], 'g')
+hold on
+plot([0 x(end)],[0 y(end)],'r','LineWidth',2)
+axis('equal')
+title(['d.) ecc=' num2str(ecc) '  p=1  a=' num2str(a) '  rp=' num2str(rp)]) 
+
+figure(5)
+set(gcf, 'Visible', 'off') 
+hold on
+plot(x,y,':','LineWidth',2)
+
+
+%% e.)
+
+figure(5)
+hold on
+scatter(0,0,'black','filled')
+axis('equal')
+legend('0.7','0.0','2.2','1.0')
+title('e.) Composite Plot')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>

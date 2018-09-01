@@ -1,0 +1,312 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      --><title>Hw7p2</title><meta name="generator" content="MATLAB 7.9"><meta name="date" content="2012-05-23"><meta name="m-file" content="Hw7p2"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Hw7.2</a></li><li><a href="#2">a.)</a></li><li><a href="#3">b.)</a></li><li><a href="#4">c.)</a></li><li><a href="#5">d.)</a></li><li><a href="#6">e.) Just a diagram, see paper</a></li><li><a href="#7">f.)</a></li><li><a href="#8">g.)</a></li><li><a href="#9">h.)</a></li><li><a href="#10">i.)</a></li></ul></div><h2>Hw7.2<a name="1"></a></h2><pre class="codeinput">clear <span class="string">all</span>; close <span class="string">all</span>; clc; format <span class="string">long</span>
+
+mu_E = 398600; <span class="comment">%km3/s2</span>
+R_E = 6378; <span class="comment">%km</span>
+E_r_M = 384400; <span class="comment">%km</span>
+mu_M = 4903; <span class="comment">%km3/s2</span>
+R_M = 1738; <span class="comment">%km</span>
+</pre><h2>a.)<a name="2"></a></h2><pre class="codeinput">v_arrival = [0.7237 0.1872 0]';
+
+h_vec = cross([E_r_M 0 0], v_arrival);
+
+h_mag = norm(h_vec);
+
+disp([<span class="string">'specific angular momentum = '</span> num2str(h_mag) <span class="string">' km^2/s'</span>])
+</pre><pre class="codeoutput">specific angular momentum = 71959.68 km^2/s
+</pre><h2>b.)<a name="3"></a></h2><pre class="codeinput">r_peri = R_E + 200;
+
+v_peri = h_mag/r_peri;
+
+v_circ = sqrt(mu_E/r_peri);
+
+delta_v_TLI = v_peri - v_circ;
+
+disp([<span class="string">'delta V_TLI = '</span> num2str(delta_v_TLI) <span class="string">' km/s'</span>])
+</pre><pre class="codeoutput">delta V_TLI = 3.1551 km/s
+</pre><h2>c.)<a name="4"></a></h2><pre class="codeinput"><span class="comment">% characteristics of transfer ellipse</span>
+energy_trans = 0.5*v_peri^2 - mu_E/r_peri;
+ecc_trans = sqrt(1+2*energy_trans*h_mag^2/mu_E^2);
+p_trans = h_mag^2/mu_E;
+
+<span class="comment">% imagine if we had used a hohmann transfer</span>
+ecc_hoh = (E_r_M - r_peri)/(E_r_M + r_peri);
+p_hoh = 0.5*(E_r_M + r_peri)*(1-ecc_hoh^2);
+
+<span class="comment">% enforce constraint r_hoh(nu=180) = r_trans(nu=alpha)</span>
+alpha = pi - acos( ((p_trans/p_hoh)*(ecc_hoh-1) + 1)/ecc_trans);
+
+<span class="comment">% check that I got the right answer, should = 384400</span>
+p_trans/(1 + ecc_trans*cos(alpha));
+
+disp([<span class="string">'alpha = '</span> num2str(alpha*180/pi) <span class="string">' deg'</span>])
+</pre><pre class="codeoutput">alpha = 172.3375 deg
+</pre><h2>d.)<a name="5"></a></h2><pre class="codeinput"><span class="comment">% alpha_vec = 0:0.001:alpha;</span>
+<span class="comment">% Y = p_trans./(1+ecc_trans*cos(alpha_vec));</span>
+<span class="comment">% polar(alpha_vec,Y)</span>
+<span class="comment">% trapz(alpha_vec,Y)</span>
+
+a_trans = p_trans/(1-ecc_trans^2);
+
+Yfun = @(nu) 0.5*(p_trans./(1+ecc_trans*cos(nu))).^2;
+area_swept = quad(Yfun,0,alpha);
+
+area_ellipse = 2*quad(Yfun,0,pi);
+
+tau_ellipse = 2*pi*sqrt(a_trans^3/mu_E);
+
+tau_trans = tau_ellipse*area_swept/area_ellipse;
+
+disp([<span class="string">'transfer time = '</span> num2str(tau_trans/(3600*24)) <span class="string">' days'</span>])
+</pre><pre class="codeoutput">transfer time = 2.9856 days
+</pre><h2>e.) Just a diagram, see paper<a name="6"></a></h2><h2>f.)<a name="7"></a></h2><pre class="codeinput"><span class="comment">% Note counterclockwise is positive nu</span>
+E_v_s__minM = v_arrival;
+
+<span class="comment">% velocity of moon, assuming circular orbit about earth, assuming the</span>
+<span class="comment">% Earth's position is unaffected by orbit of the moon</span>
+E_v_M = [0 sqrt(mu_E/E_r_M) 0]';
+<span class="comment">% tau_moon = 2*pi*sqrt(E_r_M^3/mu_E)/(3600*24)</span>
+
+M_v_s__mininf = E_v_s__minM - E_v_M;
+
+delta = 2*acos(-M_v_s__mininf(2)/norm(M_v_s__mininf));
+
+ecc_hyperb = 1/sin(delta/2);
+
+disp([<span class="string">'turning angle delta = '</span> num2str(delta*180/pi) <span class="string">' degrees'</span>])
+disp([<span class="string">'hyperbolic eccentricity = '</span> num2str(ecc_hyperb) ])
+</pre><pre class="codeoutput">turning angle delta = 82.0968 degrees
+hyperbolic eccentricity = 1.5228
+</pre><h2>g.)<a name="8"></a></h2><pre class="codeinput">rp_moon = mu_M*(ecc_hyperb-1)/norm(M_v_s__mininf)^2;
+b_hyperb = (mu_M/norm(M_v_s__mininf)^2) * sqrt(ecc_hyperb^2-1);
+
+disp([<span class="string">'periselenium = '</span> num2str(rp_moon) <span class="string">' km'</span>])
+disp([<span class="string">'desired b for lunar insertion = '</span> num2str(b_hyperb) <span class="string">' km'</span>])
+</pre><pre class="codeoutput">periselenium = 2110.5121 km
+desired b for lunar insertion = 4636.2837 km
+</pre><h2>h.)<a name="9"></a></h2><pre class="codeinput">v_circ_moon = sqrt(mu_M/rp_moon);
+v_peri_moon = sqrt( norm(M_v_s__mininf)^2 + 2*mu_M/rp_moon);
+
+delta_v_moon = -v_circ_moon + v_peri_moon;
+disp([<span class="string">'delta V for LOI = '</span> num2str(delta_v_moon) <span class="string">' km/s'</span>])
+</pre><pre class="codeoutput">delta V for LOI = 0.89671 km/s
+</pre><h2>i.)<a name="10"></a></h2><pre class="codeinput">M_v_s__plusinf = M_v_s__mininf .* [-1 1 1]';
+
+E_v_s__plusM = M_v_s__plusinf + E_v_M;
+
+<span class="comment">% Just using this for graphing purposes</span>
+disp([<span class="string">'Velocity of craft on return trip = ['</span> num2str(E_v_s__plusM') <span class="string">'] km/s'</span>])
+</pre><pre class="codeoutput">Velocity of craft on return trip = [-0.7237      0.1872           0] km/s
+</pre><p class="footer"><br>
+      Published with MATLAB&reg; 7.9<br></p></div><!--
+##### SOURCE BEGIN #####
+%% Hw7.2
+clear all; close all; clc; format long
+
+mu_E = 398600; %km3/s2
+R_E = 6378; %km
+E_r_M = 384400; %km
+mu_M = 4903; %km3/s2
+R_M = 1738; %km
+
+
+%% a.)
+
+v_arrival = [0.7237 0.1872 0]';
+
+h_vec = cross([E_r_M 0 0], v_arrival);
+
+h_mag = norm(h_vec);
+
+disp(['specific angular momentum = ' num2str(h_mag) ' km^2/s'])
+
+%% b.)
+
+r_peri = R_E + 200;
+
+v_peri = h_mag/r_peri;
+
+v_circ = sqrt(mu_E/r_peri);
+
+delta_v_TLI = v_peri - v_circ;
+
+disp(['delta V_TLI = ' num2str(delta_v_TLI) ' km/s'])
+
+%% c.)
+
+% characteristics of transfer ellipse
+energy_trans = 0.5*v_peri^2 - mu_E/r_peri;
+ecc_trans = sqrt(1+2*energy_trans*h_mag^2/mu_E^2);
+p_trans = h_mag^2/mu_E;
+
+% imagine if we had used a hohmann transfer
+ecc_hoh = (E_r_M - r_peri)/(E_r_M + r_peri);
+p_hoh = 0.5*(E_r_M + r_peri)*(1-ecc_hoh^2);
+
+% enforce constraint r_hoh(nu=180) = r_trans(nu=alpha)
+alpha = pi - acos( ((p_trans/p_hoh)*(ecc_hoh-1) + 1)/ecc_trans);
+
+% check that I got the right answer, should = 384400
+p_trans/(1 + ecc_trans*cos(alpha));
+
+disp(['alpha = ' num2str(alpha*180/pi) ' deg'])
+
+%% d.)
+
+% alpha_vec = 0:0.001:alpha;
+% Y = p_trans./(1+ecc_trans*cos(alpha_vec));
+% polar(alpha_vec,Y)
+% trapz(alpha_vec,Y)
+
+a_trans = p_trans/(1-ecc_trans^2);
+
+Yfun = @(nu) 0.5*(p_trans./(1+ecc_trans*cos(nu))).^2;
+area_swept = quad(Yfun,0,alpha);
+
+area_ellipse = 2*quad(Yfun,0,pi);
+
+tau_ellipse = 2*pi*sqrt(a_trans^3/mu_E);
+
+tau_trans = tau_ellipse*area_swept/area_ellipse;
+
+disp(['transfer time = ' num2str(tau_trans/(3600*24)) ' days'])
+
+%% e.) Just a diagram, see paper
+
+%% f.) 
+
+% Note counterclockwise is positive nu
+E_v_s__minM = v_arrival;
+
+% velocity of moon, assuming circular orbit about earth, assuming the
+% Earth's position is unaffected by orbit of the moon
+E_v_M = [0 sqrt(mu_E/E_r_M) 0]';
+% tau_moon = 2*pi*sqrt(E_r_M^3/mu_E)/(3600*24)
+
+M_v_s__mininf = E_v_s__minM - E_v_M;
+
+delta = 2*acos(-M_v_s__mininf(2)/norm(M_v_s__mininf));
+
+ecc_hyperb = 1/sin(delta/2);
+
+disp(['turning angle delta = ' num2str(delta*180/pi) ' degrees'])
+disp(['hyperbolic eccentricity = ' num2str(ecc_hyperb) ])
+
+%% g.)
+
+rp_moon = mu_M*(ecc_hyperb-1)/norm(M_v_s__mininf)^2;
+b_hyperb = (mu_M/norm(M_v_s__mininf)^2) * sqrt(ecc_hyperb^2-1);
+
+disp(['periselenium = ' num2str(rp_moon) ' km'])
+disp(['desired b for lunar insertion = ' num2str(b_hyperb) ' km'])
+
+%% h.)
+
+v_circ_moon = sqrt(mu_M/rp_moon);
+v_peri_moon = sqrt( norm(M_v_s__mininf)^2 + 2*mu_M/rp_moon);
+
+delta_v_moon = -v_circ_moon + v_peri_moon;
+disp(['delta V for LOI = ' num2str(delta_v_moon) ' km/s'])
+
+%% i.)
+
+M_v_s__plusinf = M_v_s__mininf .* [-1 1 1]';
+
+E_v_s__plusM = M_v_s__plusinf + E_v_M;
+
+% Just using this for graphing purposes
+disp(['Velocity of craft on return trip = [' num2str(E_v_s__plusM') '] km/s'])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>

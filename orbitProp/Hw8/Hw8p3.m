@@ -1,0 +1,407 @@
+%% Hw8.3
+
+%% Part a.)
+clear all; close all; clc;
+
+DU = 6378.137;  %km
+mu_earth = 398600.440; % [km^3/sec^2]
+
+% Since we're not told where in the orbit the satellite starts, I'm just
+% going to assume that it starts at perigee.  Also, since we're not given
+% an inclination, I'm going to assume equatorial.
+
+ecc = 0.7;
+rp = 175 + DU;
+
+a = rp/(1-ecc);
+v_norm = sqrt(2*mu_earth/rp - mu_earth/a);
+
+O_r_S__eci = [0 rp 0]';
+eci_v_S__eci = [-v_norm 0 0]';
+
+state0 = [O_r_S__eci; eci_v_S__eci];
+
+tau = 2*pi*sqrt(a^3/mu_earth);
+
+t_vec = 0:120:3600*24*50;   %50 days, two minute time steps
+
+options = odeset('Events',@statedot_drag_events,'RelTol', 1e-6, 'AbsTol', 1e-9);
+[t_out, state] = ode113(@statedot_drag, t_vec, state0, options);
+
+             
+O_r_S__eci = state(:,1:3);
+
+radius = sqrt(O_r_S__eci(:,1).^2 + O_r_S__eci(:,2).^2 + O_r_S__eci(:,3).^2);
+num_steps = length(radius);
+
+figure(1)
+plot(t_vec(1:num_steps)/(3600*24), (radius-DU)/DU)
+title('Orbit Altitude vs Time (perigee_altitude = 150km)')
+xlabel('Time [Days]')
+ylabel('Altitude Above Earth [Canonical Distance Units]')
+
+
+disp(['Satellite crashes after ' num2str(t_vec(num_steps)/(3600*24)) ' days'])
+
+%% Part b.)
+
+[xeplot, yeplot, zeplot] = ellipsoid(0.0, 0.0, 0.0, ...  % earth sphere
+                           DU, DU, DU, 30);
+                       
+% Setup earth plotting data
+figure(2)
+surface(xeplot, yeplot, zeplot, 'FaceColor', 'blue', 'EdgeColor', 'black');     
+hold on;
+
+plot3(O_r_S__eci(:,1), ...
+      O_r_S__eci(:,2), ...
+      O_r_S__eci(:,3), 'red');
+  
+view(3)
+
+axis equal;
+title('Orbital Decay Due To Atmospheric Drag (perigee_altitude = 150km)')
+xlabel('x [km]')
+ylabel('y [km]')
+zlabel('z [km]')
+
+
+%% Part c.)
+
+% If you imagine the effect of drag as an impulsive effect, you can make
+% sense of why perigee stays constant and apogee falls.  Imagine that the
+% effects of drag take place at the perigee; the force of the drag is
+% perpendicular to the r-vector at this location so it will not change the
+% length, that is to say r_perigee remains constant.  Now the effect of
+% drag is to remove energy from the system, which manifests itself by
+% pulling the apogee in closer and making a more circular orbit because the
+% satellite does not have enough energy to travel out to its previous
+% apogee.  Drag is, in a sense, a circularizing burn.
+
+%% Part d.) 
+
+clear all; close all; clc;
+
+DU = 6378.137;  %km
+mu_earth = 398600.440; % [km^3/sec^2]
+
+
+% Since we're not told where in the orbit the satellite starts, I'm just
+% going to assume that it starts at perigee.  Also, since we're not given
+% an inclination, I'm going to assume equatorial.
+
+ecc = 0.7;
+rp = 150 + DU;
+
+a = rp/(1-ecc);
+v_norm = sqrt(2*mu_earth/rp - mu_earth/a);
+
+O_r_S__eci = [0 rp 0]';
+eci_v_S__eci = [-v_norm 0 0]';
+
+state0 = [O_r_S__eci; eci_v_S__eci];
+
+tau = 2*pi*sqrt(a^3/mu_earth);
+
+t_vec = 0:120:3600*24*50;   %one period, one minute time steps
+
+options = odeset('Events',@statedot_drag_events,'RelTol', 1e-6, 'AbsTol', 1e-9);
+[t_out, state] = ode113(@statedot_drag, t_vec, state0, options);
+
+             
+O_r_S__eci = state(:,1:3);
+
+radius = sqrt(O_r_S__eci(:,1).^2 + O_r_S__eci(:,2).^2 + O_r_S__eci(:,3).^2);
+num_steps = length(radius);
+
+[xeplot, yeplot, zeplot] = ellipsoid(0.0, 0.0, 0.0, ...  % earth sphere
+                           DU, DU, DU, 30);
+                       
+% Setup earth plotting data
+figure(3)
+surface(xeplot, yeplot, zeplot, 'FaceColor', 'blue', 'EdgeColor', 'black');     
+hold on;
+
+plot3(O_r_S__eci(:,1), ...
+      O_r_S__eci(:,2), ...
+      O_r_S__eci(:,3), 'red');
+  
+view(3)
+
+axis equal;
+title('Orbital Decay Due To Atmospheric Drag (perigee_altitude = 150km)')
+xlabel('x [km]')
+ylabel('y [km]')
+zlabel('z [km]')
+
+
+disp(['Satellite crashes after ' num2str(t_vec(num_steps)/(3600*24)) ' days'])
+
+%% Part e.)
+
+clear all; close all; clc;
+
+DU = 6378.137;  %km
+mu_earth = 398600.440; % [km^3/sec^2]
+
+
+% Since we're not told where in the orbit the satellite starts, I'm just
+% going to assume that it starts at perigee.  Also, since we're not given
+% an inclination, I'm going to assume equatorial.
+
+ecc = 0.7;
+rp = 200 + DU;
+
+a = rp/(1-ecc);
+v_norm = sqrt(2*mu_earth/rp - mu_earth/a);
+
+O_r_S__eci = [0 rp 0]';
+eci_v_S__eci = [-v_norm 0 0]';
+
+state0 = [O_r_S__eci; eci_v_S__eci];
+
+tau = 2*pi*sqrt(a^3/mu_earth);
+
+t_vec = 0:5*60:3600*24*365;   %one year, every five minutes
+
+options = odeset('Events',@statedot_drag_events,'RelTol', 1e-6, 'AbsTol', 1e-9);
+[t_out, state] = ode113(@statedot_drag, t_vec, state0, options);
+
+             
+O_r_S__eci = state(:,1:3);
+
+radius = sqrt(O_r_S__eci(:,1).^2 + O_r_S__eci(:,2).^2 + O_r_S__eci(:,3).^2);
+num_steps = length(radius);
+
+[xeplot, yeplot, zeplot] = ellipsoid(0.0, 0.0, 0.0, ...  % earth sphere
+                           DU, DU, DU, 30);
+                       
+% Setup earth plotting data
+figure(4)
+surface(xeplot, yeplot, zeplot, 'FaceColor', 'blue', 'EdgeColor', 'black');     
+hold on;
+
+plot3(O_r_S__eci(:,1), ...
+      O_r_S__eci(:,2), ...
+      O_r_S__eci(:,3), 'red');
+  
+view(3)
+
+axis equal;
+title('Orbital Decay Due To Atmospheric Drag (perigee_altitude = 200km)')
+xlabel('x [km]')
+ylabel('y [km]')
+zlabel('z [km]')
+
+
+disp(['Satellite crashes after ' num2str(t_vec(num_steps)/(3600*24)) ' days'])
+
+%% f.)
+
+clear all; close all; clc;
+
+DU = 6378.137;  %km
+mu_earth = 398600.440; % [km^3/sec^2]
+
+
+% Since we're not told where in the orbit the satellite starts, I'm just
+% going to assume that it starts at perigee.  Also, since we're not given
+% an inclination, I'm going to assume equatorial.
+
+ecc = 0.7;
+rp = 175 + DU;
+
+a = rp/(1-ecc);
+v_norm = sqrt(2*mu_earth/rp - mu_earth/a);
+
+O_r_S__eci = [0 rp 0]';
+eci_v_S__eci = [-v_norm 0 0]';
+
+state0 = [O_r_S__eci; eci_v_S__eci];
+
+tau = 2*pi*sqrt(a^3/mu_earth);
+
+t_vec = 0:2*60:3600*24*50;   %50 days, every five minutes
+
+options = odeset('Events',@statedot_drag_events,'RelTol', 1e-6, 'AbsTol', 1e-9);
+[t_out, state] = ode113(@statedot_drag_dense, t_vec, state0, options);
+
+             
+O_r_S__eci = state(:,1:3);
+
+radius = sqrt(O_r_S__eci(:,1).^2 + O_r_S__eci(:,2).^2 + O_r_S__eci(:,3).^2);
+num_steps = length(radius);
+
+[xeplot, yeplot, zeplot] = ellipsoid(0.0, 0.0, 0.0, ...  % earth sphere
+                           DU, DU, DU, 30);
+                       
+% Setup earth plotting data
+figure(5)
+surface(xeplot, yeplot, zeplot, 'FaceColor', 'blue', 'EdgeColor', 'black');     
+hold on;
+
+plot3(O_r_S__eci(:,1), ...
+      O_r_S__eci(:,2), ...
+      O_r_S__eci(:,3), 'red');
+  
+view(3)
+
+axis equal;
+title('Orbital Decay Due To Atmospheric Drag (perigee altitude = 175km, rho0 up 1%)')
+xlabel('x [km]')
+ylabel('y [km]')
+zlabel('z [km]')
+
+
+disp(['Satellite crashes after ' num2str(t_vec(num_steps)/(3600*24)) ' days'])
+
+% This decreased the de-orbit time by about a day.
+
+%% Part g.)
+
+clear all; close all; clc;
+
+DU = 6378.137;  %km
+mu_earth = 398600.440; % [km^3/sec^2]
+
+
+% Since we're not told where in the orbit the satellite starts, I'm just
+% going to assume that it starts at perigee.  Also, since we're not given
+% an inclination, I'm going to assume equatorial.
+
+ecc = 0.7;
+rp = 175 + DU;
+
+a = rp/(1-ecc);
+v_norm = sqrt(2*mu_earth/rp - mu_earth/a);
+
+O_r_S__eci = [0 rp 0]';
+eci_v_S__eci = [-v_norm 0 0]';
+
+state0 = [O_r_S__eci; eci_v_S__eci];
+
+tau = 2*pi*sqrt(a^3/mu_earth);
+
+t_vec = 0:2*60:3600*24*50;   %50 days, every five minutes
+
+options = odeset('Events',@statedot_drag_events,'RelTol', 1e-6, 'AbsTol', 1e-9);
+[t_out, state] = ode113(@statedot_drag_H, t_vec, state0, options);
+
+             
+O_r_S__eci = state(:,1:3);
+
+radius = sqrt(O_r_S__eci(:,1).^2 + O_r_S__eci(:,2).^2 + O_r_S__eci(:,3).^2);
+num_steps = length(radius);
+
+[xeplot, yeplot, zeplot] = ellipsoid(0.0, 0.0, 0.0, ...  % earth sphere
+                           DU, DU, DU, 30);
+                       
+% Setup earth plotting data
+figure(6)
+surface(xeplot, yeplot, zeplot, 'FaceColor', 'blue', 'EdgeColor', 'black');     
+hold on;
+
+plot3(O_r_S__eci(:,1), ...
+      O_r_S__eci(:,2), ...
+      O_r_S__eci(:,3), 'red');
+  
+view(3)
+
+axis equal;
+title('Orbital Decay Due To Atmospheric Drag (perigee altitude = 175km, H up 1%)')
+xlabel('x [km]')
+ylabel('y [km]')
+zlabel('z [km]')
+
+
+disp(['Satellite crashes after ' num2str(t_vec(num_steps)/(3600*24)) ' days'])
+
+% Wow!  Changing H by 1% shaved a week off the de-orbit time!  Given how
+% sensitive the de-orbit calculation is to uncertainties in atmospheric
+% conditions, I can now appreciate how difficult it is to predict an event
+% like this.
+
+%% Part h.)
+
+clear all; close all; clc;
+
+DU = 6378.137;  %km
+mu_earth = 398600.440; % [km^3/sec^2]
+
+
+% Since we're not told where in the orbit the satellite starts, I'm just
+% going to assume that it starts at perigee.  Also, since we're not given
+% an inclination, I'm going to assume equatorial.
+
+ecc = 0.0;
+rp = 230 + DU;
+
+a = rp/(1-ecc);
+v_norm = sqrt(2*mu_earth/rp - mu_earth/a);
+
+O_r_S__eci = [0 rp 0]';
+eci_v_S__eci = [-v_norm 0 0]';
+
+state0 = [O_r_S__eci; eci_v_S__eci];
+
+tau = 2*pi*sqrt(a^3/mu_earth);
+
+t_vec = 0:2*60:3600*12;   %12 hours, every 2 minutes
+
+options = odeset('Events',@statedot_drag_events,'RelTol', 1e-6, 'AbsTol', 1e-9);
+[t_out, state] = ode113(@statedot_drag, t_vec, state0, options);
+
+             
+O_r_S__eci = state(:,1:3);
+eci_v_S__eci = state(:,4:6);
+
+radius = sqrt(O_r_S__eci(:,1).^2 + O_r_S__eci(:,2).^2 + O_r_S__eci(:,3).^2);
+speed = sqrt(eci_v_S__eci(:,1).^2 + eci_v_S__eci(:,2).^2 + eci_v_S__eci(:,3).^2);
+num_steps = length(radius);
+
+figure(7)
+plot(t_vec/(3600),radius-DU)
+title('Altitude vs Time')
+xlabel('Hours')
+ylabel('Altitude [km]')
+
+figure(8)
+plot(t_vec/(3600),speed)
+title('Speed vs Time')
+xlabel('Hours')
+ylabel('Speed [km/s]')
+
+en_kin = 0.5*speed.^2;
+en_pot = - mu_earth./radius;
+en_mech = en_kin + en_pot;
+
+figure(9)
+plot(t_vec/(3600),en_kin,t_vec/(3600),en_pot,t_vec/(3600),en_mech)
+legend('specific kinetic','specific potential','specific mechanical')
+ylabel('Specific Energy [km/s^2]')
+xlabel('Time [hours]')
+
+% This illustrates the drag paradox because the effect of drag is actually
+% to increase the velocity of the satellite.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

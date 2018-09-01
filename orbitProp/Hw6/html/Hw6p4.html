@@ -1,0 +1,292 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      --><title>Hw6p4</title><meta name="generator" content="MATLAB 7.9"><meta name="date" content="2012-05-16"><meta name="m-file" content="Hw6p4"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Hw6.4</a></li><li><a href="#2">Part b.)</a></li><li><a href="#3">Part c.)</a></li><li><a href="#4">Part d.)</a></li><li><a href="#5">Part e.)</a></li><li><a href="#6">Part f.)</a></li></ul></div><h2>Hw6.4<a name="1"></a></h2><pre class="codeinput">clear <span class="string">all</span>; close <span class="string">all</span>; clc;
+
+path(path,<span class="string">'Toolbox6'</span>)
+</pre><h2>Part b.)<a name="2"></a></h2><pre class="codeinput">r0 = [4 0 0]';  <span class="comment">%DU</span>
+v0 = [0 0.5 0]';  <span class="comment">%DU/TU</span>
+state0 = [r0; v0];
+
+[a ecc inc raan aop nu0 meanmotion M0] = getOrbitalElements(r0, v0);
+
+tau = 2*pi*sqrt(a^3);   <span class="comment">%orbit period</span>
+
+t_vec = 0:0.5:tau;
+
+
+options = odeset(<span class="string">'RelTol'</span>, 1e-3, <span class="string">'AbsTol'</span>, 1e-6);
+[t_out, state] = ode45(@statedot, t_vec, state0, options) ;
+
+figure(1)
+plot(state(:,1),state(:,2))
+axis([-6 6 -6 6])
+axis <span class="string">equal</span>
+title(<span class="string">'Circular Orbit over single period with ode45'</span>)
+xlabel(<span class="string">'x [DU]'</span>)
+ylabel(<span class="string">'y [DU]'</span>)
+</pre><pre class="codeoutput">Do Something about circular orbit
+Do Something about equatorial orbit
+</pre><img vspace="5" hspace="5" src="Hw6p4_01.png" alt=""> <h2>Part c.)<a name="3"></a></h2><pre class="codeinput">t_vec = 0:0.5:10*tau;
+
+options = odeset(<span class="string">'RelTol'</span>, 1e-3, <span class="string">'AbsTol'</span>, 1e-6);
+[t_out, state] = ode45(@statedot, t_vec, state0, options) ;
+
+figure(2)
+plot(state(:,1),state(:,2))
+axis([-6 6 -6 6])
+axis <span class="string">equal</span>
+title(<span class="string">'Circular Orbit over 10 periods with ode45'</span>)
+xlabel(<span class="string">'x [DU]'</span>)
+ylabel(<span class="string">'y [DU]'</span>)
+
+
+<span class="comment">% The slow change in the orbit's shape is definitely a numerical effect.</span>
+<span class="comment">% Nowhere have I accounted for any forces other than simple center-pointing</span>
+<span class="comment">% gravity.  I find it especially weird that when you nail the period, the</span>
+<span class="comment">% orbit hooks up with itself and makes a closed circle, but when you</span>
+<span class="comment">% over-estimate the period, the orbit no longer closes back upon itself.  I</span>
+<span class="comment">% would have thought that the error there would be roughly the same, but I</span>
+<span class="comment">% guess the ode45 takes future guesses into account so if there is no</span>
+<span class="comment">% future, you get a different answer?</span>
+</pre><img vspace="5" hspace="5" src="Hw6p4_02.png" alt=""> <h2>Part d.)<a name="4"></a></h2><pre class="codeinput">t_vec = 0:0.5:10*tau;
+
+options = odeset(<span class="string">'RelTol'</span>, 1e-3, <span class="string">'AbsTol'</span>, 1e-6);
+[t_out, state] = ode113(@statedot, t_vec, state0, options) ;
+
+figure(3)
+plot(state(:,1),state(:,2))
+axis([-6 6 -6 6])
+axis <span class="string">equal</span>
+title(<span class="string">'Circular Orbit over 10 periods with ode113'</span>)
+xlabel(<span class="string">'x [DU]'</span>)
+ylabel(<span class="string">'y [DU]'</span>)
+
+
+<span class="comment">% This method is doing WAY better than ode45.  You can still see some</span>
+<span class="comment">% numerical error, but it's much smaller.</span>
+</pre><img vspace="5" hspace="5" src="Hw6p4_03.png" alt=""> <h2>Part e.)<a name="5"></a></h2><pre class="codeinput">r0 = [4 0 0]';  <span class="comment">%DU</span>
+v0 = [0 0.4 0]';  <span class="comment">%DU/TU</span>
+state0 = [r0; v0];
+
+[a ecc inc raan aop nu0 meanmotion M0] = getOrbitalElements(r0, v0);
+
+tau = 2*pi*sqrt(a^3);   <span class="comment">%orbit period</span>
+
+t_vec = 0:0.5:10*tau;
+
+options = odeset(<span class="string">'RelTol'</span>, 1e-3, <span class="string">'AbsTol'</span>, 1e-6);
+[t_out, state] = ode113(@statedot, t_vec, state0, options) ;
+
+figure(4)
+plot(state(:,1),state(:,2))
+axis([-6 6 -6 6])
+axis <span class="string">equal</span>
+title(<span class="string">'Elliptical Orbit over 10 periods with ode113'</span>)
+xlabel(<span class="string">'x [DU]'</span>)
+ylabel(<span class="string">'y [DU]'</span>)
+</pre><pre class="codeoutput">Do Something about equatorial orbit
+</pre><img vspace="5" hspace="5" src="Hw6p4_04.png" alt=""> <h2>Part f.)<a name="6"></a></h2><pre class="codeinput">options = odeset(<span class="string">'RelTol'</span>, 1e-3, <span class="string">'AbsTol'</span>, 1e-6);
+[t_out, state] = ode113(@statedot_oblate, t_vec, state0, options) ;
+
+figure(5)
+plot(state(:,1),state(:,2))
+axis([-6 6 -6 6])
+axis <span class="string">equal</span>
+title(<span class="string">'Elliptical Orbit around Oblate Earth over 10 periods with ode113'</span>)
+xlabel(<span class="string">'x [DU]'</span>)
+ylabel(<span class="string">'y [DU]'</span>)
+
+<span class="comment">% The orbit changes here are still SOMEWHAT due to numerical error, but</span>
+<span class="comment">% they are very small compared to the dominant effect of Earth's</span>
+<span class="comment">% oblateness.  What we are seeing here is a real effect.</span>
+</pre><img vspace="5" hspace="5" src="Hw6p4_05.png" alt=""> <p class="footer"><br>
+      Published with MATLAB&reg; 7.9<br></p></div><!--
+##### SOURCE BEGIN #####
+%% Hw6.4
+clear all; close all; clc;
+
+path(path,'Toolbox6')
+%% Part b.)
+r0 = [4 0 0]';  %DU
+v0 = [0 0.5 0]';  %DU/TU
+state0 = [r0; v0];
+
+[a ecc inc raan aop nu0 meanmotion M0] = getOrbitalElements(r0, v0);
+
+tau = 2*pi*sqrt(a^3);   %orbit period
+
+t_vec = 0:0.5:tau;
+
+
+options = odeset('RelTol', 1e-3, 'AbsTol', 1e-6);
+[t_out, state] = ode45(@statedot, t_vec, state0, options) ;
+
+figure(1)
+plot(state(:,1),state(:,2))
+axis([-6 6 -6 6])
+axis equal
+title('Circular Orbit over single period with ode45')
+xlabel('x [DU]')
+ylabel('y [DU]')
+
+
+%% Part c.)
+
+t_vec = 0:0.5:10*tau;
+
+options = odeset('RelTol', 1e-3, 'AbsTol', 1e-6);
+[t_out, state] = ode45(@statedot, t_vec, state0, options) ;
+
+figure(2)
+plot(state(:,1),state(:,2))
+axis([-6 6 -6 6])
+axis equal
+title('Circular Orbit over 10 periods with ode45')
+xlabel('x [DU]')
+ylabel('y [DU]')
+
+
+% The slow change in the orbit's shape is definitely a numerical effect.
+% Nowhere have I accounted for any forces other than simple center-pointing
+% gravity.  I find it especially weird that when you nail the period, the
+% orbit hooks up with itself and makes a closed circle, but when you
+% over-estimate the period, the orbit no longer closes back upon itself.  I
+% would have thought that the error there would be roughly the same, but I
+% guess the ode45 takes future guesses into account so if there is no
+% future, you get a different answer?
+
+
+%% Part d.)
+
+t_vec = 0:0.5:10*tau;
+
+options = odeset('RelTol', 1e-3, 'AbsTol', 1e-6);
+[t_out, state] = ode113(@statedot, t_vec, state0, options) ;
+
+figure(3)
+plot(state(:,1),state(:,2))
+axis([-6 6 -6 6])
+axis equal
+title('Circular Orbit over 10 periods with ode113')
+xlabel('x [DU]')
+ylabel('y [DU]')
+
+
+% This method is doing WAY better than ode45.  You can still see some
+% numerical error, but it's much smaller.
+
+
+%% Part e.)
+
+r0 = [4 0 0]';  %DU
+v0 = [0 0.4 0]';  %DU/TU
+state0 = [r0; v0];
+
+[a ecc inc raan aop nu0 meanmotion M0] = getOrbitalElements(r0, v0);
+
+tau = 2*pi*sqrt(a^3);   %orbit period
+
+t_vec = 0:0.5:10*tau;
+
+options = odeset('RelTol', 1e-3, 'AbsTol', 1e-6);
+[t_out, state] = ode113(@statedot, t_vec, state0, options) ;
+
+figure(4)
+plot(state(:,1),state(:,2))
+axis([-6 6 -6 6])
+axis equal
+title('Elliptical Orbit over 10 periods with ode113')
+xlabel('x [DU]')
+ylabel('y [DU]')
+
+
+%% Part f.)
+
+options = odeset('RelTol', 1e-3, 'AbsTol', 1e-6);
+[t_out, state] = ode113(@statedot_oblate, t_vec, state0, options) ;
+
+figure(5)
+plot(state(:,1),state(:,2))
+axis([-6 6 -6 6])
+axis equal
+title('Elliptical Orbit around Oblate Earth over 10 periods with ode113')
+xlabel('x [DU]')
+ylabel('y [DU]')
+
+% The orbit changes here are still SOMEWHAT due to numerical error, but
+% they are very small compared to the dominant effect of Earth's
+% oblateness.  What we are seeing here is a real effect.
+
+
+
+
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>

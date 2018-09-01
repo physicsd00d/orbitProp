@@ -1,0 +1,513 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      --><title>problem3_3_template</title><meta name="generator" content="MATLAB 7.9"><meta name="date" content="2012-04-25"><meta name="m-file" content="problem3_3_template"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="comment">% AA 279 Spring 2012  Problem 3.3 TEMPLATE</span>
+<span class="comment">% Andrew K. Barrows</span>
+close <span class="string">all</span>; clear <span class="string">all</span>;
+
+<span class="comment">% Earth physical constants from Vallado</span>
+muearth = 398600.4418;              <span class="comment">% [km^3/sec^2]</span>
+reearth =   6378.137;               <span class="comment">% [km] mean equatorial radius</span>
+rotEarthRad = 0.0000729211585530;  <span class="comment">% [rad/sec]</span>
+rotEarthDay = 1.0027379093;  <span class="comment">%rev/day</span>
+rotEarthDay = rotEarthRad*3600*24/(2*pi);
+e2earth =      0.006694385000;      <span class="comment">% oblate eccentricity squared</span>
+
+<span class="comment">% Greenwich Sidereal Time at 0000h 1 January 2012 UTC</span>
+<span class="comment">% from US Naval Observatory website</span>
+gst2012start = 6.6706801; <span class="comment">% [sidereal hours] from vernal equinox</span>
+
+<span class="comment">%convert to rad</span>
+gst2012start = gst2012start * 2*pi/24;    <span class="comment">%[rad]</span>
+
+<span class="comment">% Raw Two Line Element satellite data from celestrak.com April 2012</span>
+<span class="comment">%{
+</span><span class="comment">GPS BIIRM-3 (PRN 12)
+</span><span class="comment">1 29601U 06052A   12104.16441319 -.00000023  00000-0  10000-3 0  6951
+</span><span class="comment">2 29601  56.1095  57.6374 0039356 355.0140   4.9311  2.00579332 39609
+</span><span class="comment">
+</span><span class="comment">CRW (WAAS/PRN 135)
+</span><span class="comment">1 28884U 05041A   12103.19604237  .00000055  00000-0  10000-3 0  3188
+</span><span class="comment">2 28884   0.0631  59.8205 0002556 318.2465 120.2737  1.00271972 23813
+</span><span class="comment">
+</span><span class="comment">ISS (ZARYA)
+</span><span class="comment">1 25544U 98067A   12105.84482193  .00014439  00000-0  19290-3 0  3751
+</span><span class="comment">2 25544  51.6438  79.3991 0007455 276.0481 165.2996 15.58297430768144
+</span><span class="comment">%}
+</span>
+<span class="comment">%</span>
+<span class="comment">% % GPS BIIRM-3 data hand-parsed from TLE data</span>
+yearo      = 2012;          <span class="comment">% epoch year</span>
+to         =  104.16441319; <span class="comment">% [day] epoch as day of year plus fraction</span>
+inc        =   56.1095;     <span class="comment">% [deg]</span>
+RAAN       =   57.6374;     <span class="comment">% [deg]</span>
+ecc          =    0.0039356;
+omega      =  355.0140;     <span class="comment">% [deg]</span>
+Mo         =    4.9311;     <span class="comment">% [deg]</span>
+meanmotion =    2.00579332; <span class="comment">% [rev/day]</span>
+<span class="comment">%</span>
+
+<span class="comment">%{
+</span><span class="comment">% Galaxy 15 / WAAS/PRN 135 data hand-parsed from TLE data
+</span><span class="comment">yearo      = 2012;          % epoch year
+</span><span class="comment">to         =  103.19604237; % [day] epoch as day of year plus fraction
+</span><span class="comment">inc        =    0.0631;     % [deg]
+</span><span class="comment">RAAN       =   59.8205;     % [deg]
+</span><span class="comment">ecc          =    0.0002556;
+</span><span class="comment">omega      =  318.2465;     % [deg]
+</span><span class="comment">Mo         =  120.2737;     % [deg]
+</span><span class="comment">meanmotion =    1.00271972; % [rev/day]
+</span><span class="comment">%}
+</span>
+
+<span class="comment">% ISS data hand-parsed from TLE data</span>
+<span class="comment">% yearo      = 2012;          % epoch year</span>
+<span class="comment">% to         =  105.84482193; % [day] epoch as day of year plus fraction</span>
+<span class="comment">% inc        =   51.6438;     % [deg]</span>
+<span class="comment">% RAAN       =   79.3991;     % [deg]</span>
+<span class="comment">% ecc          =    0.0007455;</span>
+<span class="comment">% omega      =  276.0481;     % [deg]</span>
+<span class="comment">% Mo         =  165.2996;     % [deg]</span>
+<span class="comment">% meanmotion =   15.58297430; % [rev/day]</span>
+
+
+<span class="comment">%convert the elements from degrees to radians</span>
+inc = inc*pi/180;
+RAAN = RAAN*pi/180;
+omega = omega*pi/180;
+Mo = Mo*pi/180;
+
+
+<span class="comment">% Setup simulation time vector</span>
+t = 1:(24*60*60);
+<span class="comment">% t = ((to - 105)*24*60*60):(24*60*60);</span>
+
+<span class="comment">% Calculate orbital parameters</span>
+n = (meanmotion*2.0*pi)/(24*60*60);        <span class="comment">% [rad/sec]</span>
+p = ((muearth/(n*n))^(1.0/3.0))*(1.0-ecc*ecc); <span class="comment">% [km]</span>
+
+eci_C_peri = PERI_C_ECI(RAAN,inc,omega)';
+<span class="comment">% Notation note for eci_C_peri: This transforms from perifocal coordinates</span>
+<span class="comment">% to ECI coordinates according to r_eci = eci_C_peri * r_peri</span>
+
+<span class="comment">% Set aside space for data</span>
+<span class="comment">% Nx3 matrices store eci or ecef positions at N datapoints.  Each row</span>
+<span class="comment">% is one timestep, and columns 1, 2, and 3 hold the three components.</span>
+O_r_S__eci  = zeros(length(t),3); <span class="comment">% [km]  Sat position in ECI coordinates</span>
+O_r_S__ecef = zeros(length(t),3); <span class="comment">% [km]  Sat position in ECEF coordinates</span>
+lat_S       = zeros(length(t),1); <span class="comment">% [rad] Satellite geodetic latitude</span>
+lon_S       = zeros(length(t),1); <span class="comment">% [rad] Satellite longitude</span>
+he_S        = zeros(length(t),1); <span class="comment">% [km]  Satellite height above ellipsoid</span>
+
+<span class="comment">% Simulate orbit by stepping through time vector</span>
+<span class="keyword">for</span> i = 1:length(t)
+    UTC = UTC_time(1,5,2012,t(i));  <span class="comment">%[days]</span>
+<span class="comment">%      UTC = UTC_time(14,4,2012,t(i));  %[days]</span>
+
+    <span class="comment">% Find mean anomaly and put in range [0, 2*pi)</span>
+    MeanAnom = mod(n*(UTC - to)*24*60*60 + Mo,2*pi);
+
+    <span class="comment">% Find eccentric anomaly</span>
+    EccAnom = EccentricAnomaly(MeanAnom,ecc,1e-10);
+
+    <span class="comment">% Find position of satellite in perifocal coordinates</span>
+    TrueAnom = TrueAnomaly(EccAnom, MeanAnom, ecc);
+    r = p./(1+ecc*cos(TrueAnom));
+
+    O_r_S__peri = [r*cos(TrueAnom); r*sin(TrueAnom); 0];
+
+    <span class="comment">% Convert perifocal coordinates to ECI coordinates</span>
+    O_r_S__eci(i,:) = eci_C_peri * O_r_S__peri;   <span class="comment">% O_r_S__eci(i,:) is a 1x3 row matrix</span>
+
+    <span class="comment">% Find angle of Greenwich meridian from vernal equinox [0, 2*pi)</span>
+    theta_g = mod(gst2012start + rotEarthDay*(UTC - 1)*2*pi,2*pi);
+<span class="comment">%     theta_g = gst2012start + 0.0657098244*floor(UTC) + 1.00273791*(UTC - floor(UTC))*24;</span>
+
+    <span class="comment">% Convert ECI coordinates to ECEF coordinates</span>
+    ecef_C_eci = [cos(theta_g) sin(theta_g) 0; -sin(theta_g) cos(theta_g) 0; 0 0 1];
+
+    O_r_S__ecef(i,:) = ecef_C_eci * O_r_S__eci(i,:)';
+
+
+    <span class="comment">% Find geodetic latitude, longitude, and height above ellipsoid</span>
+    [lat_S(i), lon_S(i), he_S(i)] = ECEF_To_Geodetic(O_r_S__ecef(i,1), O_r_S__ecef(i,2), O_r_S__ecef(i,3));
+<span class="keyword">end</span>
+
+<span class="comment">% Plot data</span>
+plotcolor = <span class="string">'red'</span>;
+ticki = 60*60; <span class="comment">% tick interval - one tickmark every 'ticki' datapoints</span>
+
+<span class="comment">% Setup earth plotting data</span>
+load(<span class="string">'topo.mat'</span>, <span class="string">'topo'</span>); <span class="comment">% MATLAB-provided earth data</span>
+topoplot = [topo(:,181:360) topo(:,1:180)]; <span class="comment">% -180 to +180 longitude</span>
+[xeplot, yeplot, zeplot] = ellipsoid(0.0, 0.0, 0.0, <span class="keyword">...</span><span class="comment">  % earth sphere</span>
+                           reearth, reearth, reearth, 10);
+
+<span class="comment">% Plot view from inertial observer</span>
+figure(1);
+clf;
+<span class="comment">% Draw earth sphere for reference</span>
+surface(xeplot, yeplot, zeplot, <span class="string">'FaceColor'</span>, <span class="string">'blue'</span>, <span class="string">'EdgeColor'</span>, <span class="string">'black'</span>);
+hold <span class="string">on</span>;
+axis <span class="string">equal</span>;
+view(3);
+grid <span class="string">on</span>;
+set(gca,<span class="string">'XLim'</span>, [-50000 +50000], <span class="keyword">...</span>
+        <span class="string">'YLim'</span>, [-50000 +50000], <span class="keyword">...</span>
+        <span class="string">'ZLim'</span>, [-50000 +50000], <span class="keyword">...</span>
+        <span class="string">'XTick'</span>, [-50000:10000:+50000], <span class="keyword">...</span>
+        <span class="string">'YTick'</span>, [-50000:10000:+50000], <span class="keyword">...</span>
+        <span class="string">'ZTick'</span>, [-50000:10000:+50000]);
+title(<span class="string">'Problem 3.3 - Inertial Observer View'</span>);
+xlabel(<span class="string">'X [km]'</span>);
+ylabel(<span class="string">'Y [km]'</span>);
+zlabel(<span class="string">'Z [km]'</span>);
+plot3(O_r_S__eci(:,1), <span class="keyword">...</span>
+      O_r_S__eci(:,2), <span class="keyword">...</span>
+      O_r_S__eci(:,3), <span class="keyword">...</span>
+      <span class="string">'Color'</span>, plotcolor, <span class="string">'LineStyle'</span>, <span class="string">'-'</span>, <span class="string">'LineWidth'</span>, 2);
+plot3(O_r_S__eci(1:ticki:end,1), <span class="keyword">...</span>
+      O_r_S__eci(1:ticki:end,2), <span class="keyword">...</span>
+      O_r_S__eci(1:ticki:end,3), <span class="keyword">...</span>
+      <span class="string">'Color'</span>, plotcolor, <span class="string">'LineStyle'</span>, <span class="string">'none'</span>, <span class="keyword">...</span>
+      <span class="string">'Marker'</span>, <span class="string">'o'</span>, <span class="string">'MarkerFaceColor'</span>, plotcolor, <span class="string">'MarkerSize'</span>, 5);
+
+<span class="comment">% Plot view from earth-fixed observer</span>
+figure(2);
+clf;
+<span class="comment">% Draw earth sphere for reference</span>
+surface(xeplot, yeplot, zeplot, <span class="string">'FaceColor'</span>, <span class="string">'blue'</span>, <span class="string">'EdgeColor'</span>, <span class="string">'black'</span>);
+hold <span class="string">on</span>;
+axis <span class="string">equal</span>;
+view(3);
+grid <span class="string">on</span>;
+set(gca,<span class="string">'XLim'</span>, [-50000 +50000], <span class="keyword">...</span>
+        <span class="string">'YLim'</span>, [-50000 +50000], <span class="keyword">...</span>
+        <span class="string">'ZLim'</span>, [-50000 +50000], <span class="keyword">...</span>
+        <span class="string">'XTick'</span>, [-50000:10000:+50000], <span class="keyword">...</span>
+        <span class="string">'YTick'</span>, [-50000:10000:+50000], <span class="keyword">...</span>
+        <span class="string">'ZTick'</span>, [-50000:10000:+50000]);
+title(<span class="string">'Problem 3.3 - Earth-Fixed Observer View'</span>);
+xlabel(<span class="string">'X [km]'</span>);
+ylabel(<span class="string">'Y [km]'</span>);
+zlabel(<span class="string">'Z [km]'</span>);
+plot3(O_r_S__ecef(:,1), <span class="keyword">...</span>
+      O_r_S__ecef(:,2), <span class="keyword">...</span>
+      O_r_S__ecef(:,3), <span class="keyword">...</span>
+      <span class="string">'Color'</span>, plotcolor, <span class="string">'LineStyle'</span>, <span class="string">'-'</span>, <span class="string">'LineWidth'</span>, 2);
+plot3(O_r_S__ecef(1:ticki:end,1), <span class="keyword">...</span>
+      O_r_S__ecef(1:ticki:end,2), <span class="keyword">...</span>
+      O_r_S__ecef(1:ticki:end,3), <span class="keyword">...</span>
+      <span class="string">'Color'</span>, plotcolor, <span class="string">'LineStyle'</span>, <span class="string">'none'</span>, <span class="keyword">...</span>
+      <span class="string">'Marker'</span>, <span class="string">'o'</span>, <span class="string">'MarkerFaceColor'</span>, plotcolor, <span class="string">'MarkerSize'</span>, 5);
+
+<span class="comment">% Plot groundtrack</span>
+figure(3);
+clf;
+<span class="comment">% Draw earth outline map for reference.  'contour' command may work</span>
+<span class="comment">% differently in older versions of MATLAB</span>
+contour(-180:179, -90:+89, topoplot, [0 0], <span class="string">'blue'</span>);
+hold <span class="string">on</span>;
+axis <span class="string">equal</span>;
+grid <span class="string">on</span>;
+set(gca,<span class="string">'XLim'</span>, [-180 +180], <span class="string">'YLim'</span>, [-90 +90], <span class="keyword">...</span>
+        <span class="string">'XTick'</span>, [-180:30:+180], <span class="string">'Ytick'</span>, [-90:30:+90]);
+title(<span class="string">'Problem 3.3 - Ground Track'</span>);
+xlabel(<span class="string">'Longitude [deg]'</span>);
+ylabel(<span class="string">'Latitude [deg]'</span>);
+<span class="comment">% Use 'markers' instead of 'lines' for this plot to avoid distracting</span>
+<span class="comment">% jumps in plot for data that crosses 180 [deg] longitude</span>
+plot(lon_S*180.0/pi, lat_S*180.0/pi, <span class="keyword">...</span>
+     <span class="string">'Color'</span>, plotcolor, <span class="string">'LineStyle'</span>, <span class="string">'none'</span>, <span class="keyword">...</span>
+     <span class="string">'Marker'</span>, <span class="string">'o'</span>, <span class="string">'MarkerFaceColor'</span>, plotcolor, <span class="string">'MarkerSize'</span>, 2);
+plot(lon_S(1:ticki:end)*180.0/pi, lat_S(1:ticki:end)*180.0/pi, <span class="keyword">...</span>
+     <span class="string">'Color'</span>, plotcolor, <span class="string">'LineStyle'</span>, <span class="string">'none'</span>, <span class="keyword">...</span>
+     <span class="string">'Marker'</span>, <span class="string">'o'</span>, <span class="string">'MarkerFaceColor'</span>, plotcolor, <span class="string">'MarkerSize'</span>, 5);
+</pre><img vspace="5" hspace="5" src="problem3_3_template_01.png" alt=""> <img vspace="5" hspace="5" src="problem3_3_template_02.png" alt=""> <img vspace="5" hspace="5" src="problem3_3_template_03.png" alt=""> <p class="footer"><br>
+      Published with MATLAB&reg; 7.9<br></p></div><!--
+##### SOURCE BEGIN #####
+% AA 279 Spring 2012  Problem 3.3 TEMPLATE
+% Andrew K. Barrows
+close all; clear all;
+
+% Earth physical constants from Vallado
+muearth = 398600.4418;              % [km^3/sec^2]
+reearth =   6378.137;               % [km] mean equatorial radius
+rotEarthRad = 0.0000729211585530;  % [rad/sec]
+rotEarthDay = 1.0027379093;  %rev/day
+rotEarthDay = rotEarthRad*3600*24/(2*pi);
+e2earth =      0.006694385000;      % oblate eccentricity squared
+
+% Greenwich Sidereal Time at 0000h 1 January 2012 UTC
+% from US Naval Observatory website
+gst2012start = 6.6706801; % [sidereal hours] from vernal equinox
+
+%convert to rad
+gst2012start = gst2012start * 2*pi/24;    %[rad]
+
+% Raw Two Line Element satellite data from celestrak.com April 2012
+%{
+GPS BIIRM-3 (PRN 12)    
+1 29601U 06052A   12104.16441319 -.00000023  00000-0  10000-3 0  6951
+2 29601  56.1095  57.6374 0039356 355.0140   4.9311  2.00579332 39609
+
+CRW (WAAS/PRN 135)      
+1 28884U 05041A   12103.19604237  .00000055  00000-0  10000-3 0  3188
+2 28884   0.0631  59.8205 0002556 318.2465 120.2737  1.00271972 23813
+
+ISS (ZARYA)             
+1 25544U 98067A   12105.84482193  .00014439  00000-0  19290-3 0  3751
+2 25544  51.6438  79.3991 0007455 276.0481 165.2996 15.58297430768144
+%}
+
+%
+% % GPS BIIRM-3 data hand-parsed from TLE data
+yearo      = 2012;          % epoch year
+to         =  104.16441319; % [day] epoch as day of year plus fraction
+inc        =   56.1095;     % [deg]
+RAAN       =   57.6374;     % [deg]
+ecc          =    0.0039356;
+omega      =  355.0140;     % [deg]
+Mo         =    4.9311;     % [deg] 
+meanmotion =    2.00579332; % [rev/day]
+%
+
+%{
+% Galaxy 15 / WAAS/PRN 135 data hand-parsed from TLE data
+yearo      = 2012;          % epoch year
+to         =  103.19604237; % [day] epoch as day of year plus fraction
+inc        =    0.0631;     % [deg]
+RAAN       =   59.8205;     % [deg]
+ecc          =    0.0002556;
+omega      =  318.2465;     % [deg]
+Mo         =  120.2737;     % [deg] 
+meanmotion =    1.00271972; % [rev/day]
+%}
+
+
+% ISS data hand-parsed from TLE data
+% yearo      = 2012;          % epoch year
+% to         =  105.84482193; % [day] epoch as day of year plus fraction
+% inc        =   51.6438;     % [deg]
+% RAAN       =   79.3991;     % [deg]
+% ecc          =    0.0007455;
+% omega      =  276.0481;     % [deg]
+% Mo         =  165.2996;     % [deg] 
+% meanmotion =   15.58297430; % [rev/day]
+
+
+%convert the elements from degrees to radians
+inc = inc*pi/180;
+RAAN = RAAN*pi/180;
+omega = omega*pi/180;
+Mo = Mo*pi/180;
+
+
+% Setup simulation time vector
+t = 1:(24*60*60);
+% t = ((to - 105)*24*60*60):(24*60*60);
+
+% Calculate orbital parameters
+n = (meanmotion*2.0*pi)/(24*60*60);        % [rad/sec]
+p = ((muearth/(n*n))^(1.0/3.0))*(1.0-ecc*ecc); % [km]
+
+eci_C_peri = PERI_C_ECI(RAAN,inc,omega)';             
+% Notation note for eci_C_peri: This transforms from perifocal coordinates
+% to ECI coordinates according to r_eci = eci_C_peri * r_peri
+   
+% Set aside space for data
+% Nx3 matrices store eci or ecef positions at N datapoints.  Each row
+% is one timestep, and columns 1, 2, and 3 hold the three components.
+O_r_S__eci  = zeros(length(t),3); % [km]  Sat position in ECI coordinates
+O_r_S__ecef = zeros(length(t),3); % [km]  Sat position in ECEF coordinates
+lat_S       = zeros(length(t),1); % [rad] Satellite geodetic latitude
+lon_S       = zeros(length(t),1); % [rad] Satellite longitude
+he_S        = zeros(length(t),1); % [km]  Satellite height above ellipsoid
+
+% Simulate orbit by stepping through time vector
+for i = 1:length(t)
+    UTC = UTC_time(1,5,2012,t(i));  %[days]
+%      UTC = UTC_time(14,4,2012,t(i));  %[days]
+
+    % Find mean anomaly and put in range [0, 2*pi)
+    MeanAnom = mod(n*(UTC - to)*24*60*60 + Mo,2*pi);
+    
+    % Find eccentric anomaly
+    EccAnom = EccentricAnomaly(MeanAnom,ecc,1e-10);
+     
+    % Find position of satellite in perifocal coordinates
+    TrueAnom = TrueAnomaly(EccAnom, MeanAnom, ecc);
+    r = p./(1+ecc*cos(TrueAnom));
+    
+    O_r_S__peri = [r*cos(TrueAnom); r*sin(TrueAnom); 0];
+    
+    % Convert perifocal coordinates to ECI coordinates
+    O_r_S__eci(i,:) = eci_C_peri * O_r_S__peri;   % O_r_S__eci(i,:) is a 1x3 row matrix
+   
+    % Find angle of Greenwich meridian from vernal equinox [0, 2*pi)
+    theta_g = mod(gst2012start + rotEarthDay*(UTC - 1)*2*pi,2*pi);
+%     theta_g = gst2012start + 0.0657098244*floor(UTC) + 1.00273791*(UTC - floor(UTC))*24;
+ 
+    % Convert ECI coordinates to ECEF coordinates
+    ecef_C_eci = [cos(theta_g) sin(theta_g) 0; -sin(theta_g) cos(theta_g) 0; 0 0 1];
+    
+    O_r_S__ecef(i,:) = ecef_C_eci * O_r_S__eci(i,:)';
+
+    
+    % Find geodetic latitude, longitude, and height above ellipsoid    
+    [lat_S(i), lon_S(i), he_S(i)] = ECEF_To_Geodetic(O_r_S__ecef(i,1), O_r_S__ecef(i,2), O_r_S__ecef(i,3));
+end        
+
+% Plot data
+plotcolor = 'red';
+ticki = 60*60; % tick interval - one tickmark every 'ticki' datapoints
+
+% Setup earth plotting data
+load('topo.mat', 'topo'); % MATLAB-provided earth data
+topoplot = [topo(:,181:360) topo(:,1:180)]; % -180 to +180 longitude
+[xeplot, yeplot, zeplot] = ellipsoid(0.0, 0.0, 0.0, ...  % earth sphere
+                           reearth, reearth, reearth, 10);
+
+% Plot view from inertial observer
+figure(1);
+clf;
+% Draw earth sphere for reference
+surface(xeplot, yeplot, zeplot, 'FaceColor', 'blue', 'EdgeColor', 'black');     
+hold on;
+axis equal;
+view(3);
+grid on;
+set(gca,'XLim', [-50000 +50000], ...
+        'YLim', [-50000 +50000], ...
+        'ZLim', [-50000 +50000], ...
+        'XTick', [-50000:10000:+50000], ...
+        'YTick', [-50000:10000:+50000], ...
+        'ZTick', [-50000:10000:+50000]);
+title('Problem 3.3 - Inertial Observer View');
+xlabel('X [km]');
+ylabel('Y [km]');
+zlabel('Z [km]');
+plot3(O_r_S__eci(:,1), ...
+      O_r_S__eci(:,2), ...
+      O_r_S__eci(:,3), ...
+      'Color', plotcolor, 'LineStyle', '-', 'LineWidth', 2);
+plot3(O_r_S__eci(1:ticki:end,1), ...
+      O_r_S__eci(1:ticki:end,2), ...
+      O_r_S__eci(1:ticki:end,3), ...
+      'Color', plotcolor, 'LineStyle', 'none', ...
+      'Marker', 'o', 'MarkerFaceColor', plotcolor, 'MarkerSize', 5);
+
+% Plot view from earth-fixed observer
+figure(2);
+clf;
+% Draw earth sphere for reference
+surface(xeplot, yeplot, zeplot, 'FaceColor', 'blue', 'EdgeColor', 'black');
+hold on;
+axis equal;
+view(3);
+grid on;
+set(gca,'XLim', [-50000 +50000], ...
+        'YLim', [-50000 +50000], ...
+        'ZLim', [-50000 +50000], ...
+        'XTick', [-50000:10000:+50000], ...
+        'YTick', [-50000:10000:+50000], ...
+        'ZTick', [-50000:10000:+50000]);
+title('Problem 3.3 - Earth-Fixed Observer View');
+xlabel('X [km]');
+ylabel('Y [km]');
+zlabel('Z [km]');
+plot3(O_r_S__ecef(:,1), ...
+      O_r_S__ecef(:,2), ...
+      O_r_S__ecef(:,3), ...
+      'Color', plotcolor, 'LineStyle', '-', 'LineWidth', 2);
+plot3(O_r_S__ecef(1:ticki:end,1), ...
+      O_r_S__ecef(1:ticki:end,2), ...
+      O_r_S__ecef(1:ticki:end,3), ...
+      'Color', plotcolor, 'LineStyle', 'none', ...
+      'Marker', 'o', 'MarkerFaceColor', plotcolor, 'MarkerSize', 5);
+
+% Plot groundtrack
+figure(3);
+clf;
+% Draw earth outline map for reference.  'contour' command may work
+% differently in older versions of MATLAB
+contour(-180:179, -90:+89, topoplot, [0 0], 'blue');
+hold on;
+axis equal;
+grid on;
+set(gca,'XLim', [-180 +180], 'YLim', [-90 +90], ...
+        'XTick', [-180:30:+180], 'Ytick', [-90:30:+90]);
+title('Problem 3.3 - Ground Track');
+xlabel('Longitude [deg]');
+ylabel('Latitude [deg]');
+% Use 'markers' instead of 'lines' for this plot to avoid distracting
+% jumps in plot for data that crosses 180 [deg] longitude
+plot(lon_S*180.0/pi, lat_S*180.0/pi, ...
+     'Color', plotcolor, 'LineStyle', 'none', ...
+     'Marker', 'o', 'MarkerFaceColor', plotcolor, 'MarkerSize', 2); 
+plot(lon_S(1:ticki:end)*180.0/pi, lat_S(1:ticki:end)*180.0/pi, ...
+     'Color', plotcolor, 'LineStyle', 'none', ...
+     'Marker', 'o', 'MarkerFaceColor', plotcolor, 'MarkerSize', 5);
+##### SOURCE END #####
+--></body></html>

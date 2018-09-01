@@ -1,0 +1,14 @@
+function statedot = statedot(t, state)
+% state vector is [rx ry rz vx vy vz]'
+mu_earth = 1; %DU
+
+statedot = zeros(6,1);
+
+r = state(1:3);
+
+acc = -mu_earth*r/norm(r)^3;
+
+statedot(1:3) = state(4:6);
+statedot(4:6) = acc;
+
+end

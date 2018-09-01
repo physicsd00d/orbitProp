@@ -1,0 +1,476 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      --><title>hw2p4</title><meta name="generator" content="MATLAB 7.9"><meta name="date" content="2012-04-17"><meta name="m-file" content="hw2p4"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">HW2 Prob 4</a></li><li><a href="#2">a.)</a></li><li><a href="#3">b.)</a></li><li><a href="#4">c.)</a></li><li><a href="#5">d.)</a></li><li><a href="#6">e.)</a></li><li><a href="#7">f.) It's easier for me to do the full graph for e.) and f.) a little later</a></li><li><a href="#8">g.) Yes they makes sense.  Vp is very fast, so the tick marks are spaced far apart around perigee.  Conversely, Va is much slower, so there are a lot tick marks bunched up at apogee.</a></li><li><a href="#9">h.)</a></li><li><a href="#10">i.)</a></li><li><a href="#11">f.) This part contains the graph from e.)</a></li><li><a href="#12">j.)</a></li><li><a href="#13">k.) These tick marks make sense because they're equally spaced, as they should be for v_circular, which is known to be constant.</a></li></ul></div><h2>HW2 Prob 4<a name="1"></a></h2><pre class="codeinput">clear <span class="string">all</span>; close <span class="string">all</span>; clc
+</pre><h2>a.)<a name="2"></a></h2><pre class="codeinput">a = 2.445;
+ecc = 0.9;
+
+period = 2*pi*sqrt(a^3)
+
+mean_motion = 2*pi/period
+</pre><pre class="codeoutput">
+period =
+
+   24.0214
+
+
+mean_motion =
+
+    0.2616
+
+</pre><h2>b.)<a name="3"></a></h2><pre class="codeinput">disp(<span class="string">'nu = 0 at periapsis'</span>)
+vp = sqrt((1 + 2*ecc*cosd(0) + ecc^2)/(a*(1-ecc^2)))
+
+disp(<span class="string">'nu = 180 at apogee'</span>)
+va = sqrt((1 + 2*ecc*cosd(180) + ecc^2)/(a*(1-ecc^2)))
+</pre><pre class="codeoutput">nu = 0 at periapsis
+
+vp =
+
+    2.7876
+
+nu = 180 at apogee
+
+va =
+
+    0.1467
+
+</pre><h2>c.)<a name="4"></a></h2><pre class="codeinput">ecc = 0;
+v_circular = sqrt((1 + 2*ecc*cosd(180) + ecc^2)/(a*(1-ecc^2)))
+</pre><pre class="codeoutput">
+v_circular =
+
+    0.6395
+
+</pre><h2>d.)<a name="5"></a></h2><pre class="codeinput">disp(<span class="string">'Test case for EccentricAnomaly function works'</span>)
+EccAnom = EccentricAnomaly(1,0.5,1E-10)
+</pre><pre class="codeoutput">Test case for EccentricAnomaly function works
+
+EccAnom =
+
+    1.4987
+
+</pre><h2>e.)<a name="6"></a></h2><pre class="codeinput">clear <span class="string">all</span>; close <span class="string">all</span>; <span class="comment">%just to be safe</span>
+
+a = 2.445;
+ecc = 0.9;
+period = 2*pi*sqrt(a^3);
+mean_motion = 2*pi/period;
+
+p = a*(1-ecc^2);
+
+t = [0:0.1:24]';    <span class="comment">%TU</span>
+len = length(t);
+
+<span class="comment">% assuming the orbit starts are periapsis</span>
+MeanAnom = mean_motion*(t-t(1));
+
+EccAnom = EccentricAnomaly(MeanAnom,ecc,1E-10);
+
+num = cos(EccAnom) - ecc;
+den = 1 - ecc*cos(EccAnom);
+
+half_plane = floor(MeanAnom/pi);  <span class="comment">%which half plane are we in?</span>
+
+TrueAnom = half_plane*pi + acos((-1).^mod(half_plane,2) .* num./den);
+
+<span class="comment">% [MeanAnom EccAnom TrueAnom]*180/pi</span>
+
+r = p./(1+ecc*cos(TrueAnom));
+x = r.*cos(TrueAnom);
+y = r.*sin(TrueAnom);
+
+figure(1)
+lim = len;
+plot(x(1:lim),y(1:lim))
+hold <span class="string">on</span>
+scatter(0,0,<span class="string">'black'</span>,<span class="string">'filled'</span>)
+axis <span class="string">equal</span>
+title(<span class="string">'Orbit for part e.) and f.)'</span>)
+ylabel(<span class="string">'[DU]'</span>)
+xlabel(<span class="string">'[DU]'</span>)
+set(gcf, <span class="string">'Visible'</span>, <span class="string">'off'</span>)
+</pre><h2>f.) It's easier for me to do the full graph for e.) and f.) a little later<a name="7"></a></h2><h2>g.) Yes they makes sense.  Vp is very fast, so the tick marks are spaced far apart around perigee.  Conversely, Va is much slower, so there are a lot tick marks bunched up at apogee.<a name="8"></a></h2><h2>h.)<a name="9"></a></h2><pre class="codeinput">figure(2)
+plot(EccAnom*180/pi,MeanAnom*180/pi)
+title(<span class="string">'Eccentric Anomaly vs Mean Anomaly'</span>)
+xlabel(<span class="string">'Eccentric [Degrees]'</span>)
+ylabel(<span class="string">'Mean [Degrees]'</span>)
+axis <span class="string">equal</span>
+</pre><img vspace="5" hspace="5" src="hw2p4_01.png" alt=""> <h2>i.)<a name="10"></a></h2><pre class="codeinput">figure(3)
+plot(TrueAnom*180/pi,MeanAnom*180/pi)
+title(<span class="string">'True Anomaly vs Mean Anomaly'</span>)
+xlabel(<span class="string">'True [Degrees]'</span>)
+ylabel(<span class="string">'Mean [Degrees]'</span>)
+axis <span class="string">equal</span>
+</pre><img vspace="5" hspace="5" src="hw2p4_02.png" alt=""> <h2>f.) This part contains the graph from e.)<a name="11"></a></h2><pre class="codeinput">t = [0:1:24]';    <span class="comment">%TU</span>
+len = length(t);
+
+<span class="comment">% assuming the orbit starts are periapsis</span>
+MeanAnom = mean_motion*(t-t(1));
+
+EccAnom = EccentricAnomaly(MeanAnom,ecc,1E-10);
+
+num = cos(EccAnom) - ecc;
+den = 1 - ecc*cos(EccAnom);
+
+half_plane = floor(MeanAnom/pi);  <span class="comment">%which half plane are we in?</span>
+
+TrueAnom = half_plane*pi + acos((-1).^mod(half_plane,2) .* num./den);
+
+<span class="comment">% [MeanAnom EccAnom TrueAnom]*180/pi</span>
+
+r = p./(1+ecc*cos(TrueAnom));
+x = r.*cos(TrueAnom);
+y = r.*sin(TrueAnom);
+
+figure(1)
+hold <span class="string">on</span>
+scatter(x,y)
+</pre><img vspace="5" hspace="5" src="hw2p4_03.png" alt=""> <h2>j.)<a name="12"></a></h2><pre class="codeinput">clear <span class="string">all</span>;  <span class="comment">%just to be safe</span>
+
+a = 2.445;
+ecc = 0.0;
+period = 2*pi*sqrt(a^3);
+mean_motion = 2*pi/period;
+
+p = a*(1-ecc^2);
+
+t = [0:0.01:24]';    <span class="comment">%TU</span>
+len = length(t);
+
+<span class="comment">% assuming the orbit starts are periapsis</span>
+MeanAnom = mean_motion*(t-t(1));
+
+EccAnom = EccentricAnomaly(MeanAnom,ecc,1E-10);
+
+num = cos(EccAnom) - ecc;
+den = 1 - ecc*cos(EccAnom);
+
+half_plane = floor(MeanAnom/pi);  <span class="comment">%which half plane are we in?</span>
+
+TrueAnom = half_plane*pi + acos((-1).^mod(half_plane,2) .* num./den);
+
+<span class="comment">% [MeanAnom EccAnom TrueAnom]*180/pi</span>
+
+r = p./(1+ecc*cos(TrueAnom));
+x = r.*cos(TrueAnom);
+y = r.*sin(TrueAnom);
+
+figure(4)
+lim = len;
+plot(x(1:lim),y(1:lim))
+hold <span class="string">on</span>
+scatter(0,0,<span class="string">'black'</span>,<span class="string">'filled'</span>)
+axis <span class="string">equal</span>
+title(<span class="string">'Orbit for part e.) and f.)'</span>)
+ylabel(<span class="string">'[DU]'</span>)
+xlabel(<span class="string">'[DU]'</span>)
+set(gcf, <span class="string">'Visible'</span>, <span class="string">'off'</span>)
+
+
+t = [0:1:24]';    <span class="comment">%TU</span>
+len = length(t);
+
+<span class="comment">% assuming the orbit starts are periapsis</span>
+MeanAnom = mean_motion*(t-t(1));
+
+EccAnom = EccentricAnomaly(MeanAnom,ecc,1E-10);
+
+num = cos(EccAnom) - ecc;
+den = 1 - ecc*cos(EccAnom);
+
+half_plane = floor(MeanAnom/pi);  <span class="comment">%which half plane are we in?</span>
+
+TrueAnom = half_plane*pi + acos((-1).^mod(half_plane,2) .* num./den);
+
+<span class="comment">% [MeanAnom EccAnom TrueAnom]*180/pi</span>
+
+r = p./(1+ecc*cos(TrueAnom));
+x = r.*cos(TrueAnom);
+y = r.*sin(TrueAnom);
+
+figure(4)
+hold <span class="string">on</span>
+scatter(x,y)
+</pre><img vspace="5" hspace="5" src="hw2p4_04.png" alt=""> <h2>k.) These tick marks make sense because they're equally spaced, as they should be for v_circular, which is known to be constant.<a name="13"></a></h2><p class="footer"><br>
+      Published with MATLAB&reg; 7.9<br></p></div><!--
+##### SOURCE BEGIN #####
+%% HW2 Prob 4
+clear all; close all; clc
+
+%% a.)
+a = 2.445;
+ecc = 0.9;
+
+period = 2*pi*sqrt(a^3)
+
+mean_motion = 2*pi/period
+
+
+%% b.)
+disp('nu = 0 at periapsis')
+vp = sqrt((1 + 2*ecc*cosd(0) + ecc^2)/(a*(1-ecc^2)))
+
+disp('nu = 180 at apogee')
+va = sqrt((1 + 2*ecc*cosd(180) + ecc^2)/(a*(1-ecc^2)))
+
+%% c.)
+ecc = 0;
+v_circular = sqrt((1 + 2*ecc*cosd(180) + ecc^2)/(a*(1-ecc^2)))
+
+%% d.)
+disp('Test case for EccentricAnomaly function works')
+EccAnom = EccentricAnomaly(1,0.5,1E-10)
+
+%% e.)
+clear all; close all; %just to be safe
+
+a = 2.445;
+ecc = 0.9;
+period = 2*pi*sqrt(a^3);
+mean_motion = 2*pi/period;
+
+p = a*(1-ecc^2);
+
+t = [0:0.1:24]';    %TU
+len = length(t);
+
+% assuming the orbit starts are periapsis
+MeanAnom = mean_motion*(t-t(1));
+
+EccAnom = EccentricAnomaly(MeanAnom,ecc,1E-10);
+
+num = cos(EccAnom) - ecc;
+den = 1 - ecc*cos(EccAnom);
+
+half_plane = floor(MeanAnom/pi);  %which half plane are we in?
+
+TrueAnom = half_plane*pi + acos((-1).^mod(half_plane,2) .* num./den);
+
+% [MeanAnom EccAnom TrueAnom]*180/pi
+
+r = p./(1+ecc*cos(TrueAnom));
+x = r.*cos(TrueAnom);
+y = r.*sin(TrueAnom);
+
+figure(1)
+lim = len;
+plot(x(1:lim),y(1:lim))
+hold on
+scatter(0,0,'black','filled')
+axis equal
+title('Orbit for part e.) and f.)')
+ylabel('[DU]')
+xlabel('[DU]')
+set(gcf, 'Visible', 'off') 
+
+%% f.) It's easier for me to do the full graph for e.) and f.) a little later
+
+
+%% g.) Yes they makes sense.  Vp is very fast, so the tick marks are spaced far apart around perigee.  Conversely, Va is much slower, so there are a lot tick marks bunched up at apogee.
+
+
+%% h.) 
+figure(2)
+plot(EccAnom*180/pi,MeanAnom*180/pi)
+title('Eccentric Anomaly vs Mean Anomaly')
+xlabel('Eccentric [Degrees]')
+ylabel('Mean [Degrees]')
+axis equal
+
+
+%% i.) 
+figure(3)
+plot(TrueAnom*180/pi,MeanAnom*180/pi)
+title('True Anomaly vs Mean Anomaly')
+xlabel('True [Degrees]')
+ylabel('Mean [Degrees]')
+axis equal
+
+
+%% f.) This part contains the graph from e.)
+
+t = [0:1:24]';    %TU
+len = length(t);
+
+% assuming the orbit starts are periapsis
+MeanAnom = mean_motion*(t-t(1));
+
+EccAnom = EccentricAnomaly(MeanAnom,ecc,1E-10);
+
+num = cos(EccAnom) - ecc;
+den = 1 - ecc*cos(EccAnom);
+
+half_plane = floor(MeanAnom/pi);  %which half plane are we in?
+
+TrueAnom = half_plane*pi + acos((-1).^mod(half_plane,2) .* num./den);
+
+% [MeanAnom EccAnom TrueAnom]*180/pi
+
+r = p./(1+ecc*cos(TrueAnom));
+x = r.*cos(TrueAnom);
+y = r.*sin(TrueAnom);
+
+figure(1)
+hold on
+scatter(x,y)
+
+
+
+%% j.)
+clear all;  %just to be safe
+
+a = 2.445;
+ecc = 0.0;
+period = 2*pi*sqrt(a^3);
+mean_motion = 2*pi/period;
+
+p = a*(1-ecc^2);
+
+t = [0:0.01:24]';    %TU
+len = length(t);
+
+% assuming the orbit starts are periapsis
+MeanAnom = mean_motion*(t-t(1));
+
+EccAnom = EccentricAnomaly(MeanAnom,ecc,1E-10);
+
+num = cos(EccAnom) - ecc;
+den = 1 - ecc*cos(EccAnom);
+
+half_plane = floor(MeanAnom/pi);  %which half plane are we in?
+
+TrueAnom = half_plane*pi + acos((-1).^mod(half_plane,2) .* num./den);
+
+% [MeanAnom EccAnom TrueAnom]*180/pi
+
+r = p./(1+ecc*cos(TrueAnom));
+x = r.*cos(TrueAnom);
+y = r.*sin(TrueAnom);
+
+figure(4)
+lim = len;
+plot(x(1:lim),y(1:lim))
+hold on
+scatter(0,0,'black','filled')
+axis equal
+title('Orbit for part e.) and f.)')
+ylabel('[DU]')
+xlabel('[DU]')
+set(gcf, 'Visible', 'off') 
+
+
+t = [0:1:24]';    %TU
+len = length(t);
+
+% assuming the orbit starts are periapsis
+MeanAnom = mean_motion*(t-t(1));
+
+EccAnom = EccentricAnomaly(MeanAnom,ecc,1E-10);
+
+num = cos(EccAnom) - ecc;
+den = 1 - ecc*cos(EccAnom);
+
+half_plane = floor(MeanAnom/pi);  %which half plane are we in?
+
+TrueAnom = half_plane*pi + acos((-1).^mod(half_plane,2) .* num./den);
+
+% [MeanAnom EccAnom TrueAnom]*180/pi
+
+r = p./(1+ecc*cos(TrueAnom));
+x = r.*cos(TrueAnom);
+y = r.*sin(TrueAnom);
+
+figure(4)
+hold on
+scatter(x,y)
+
+
+%% k.) These tick marks make sense because they're equally spaced, as they should be for v_circular, which is known to be constant.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>

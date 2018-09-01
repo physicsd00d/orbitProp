@@ -1,0 +1,23 @@
+%% Check calculations
+clear all; close all; clc;
+
+%% 4.2.a)
+
+r = [0; 0; -3];
+v = [0; 0.5; 0];
+
+[a ecc inc raan aop nu0 meanmotion M0] = getOrbitalElements(r,v);
+
+%% 4.2.b)
+
+r = [0; -2; 0];
+v = [1; 0; 0];
+
+[a ecc inc raan aop nu0 meanmotion M0] = getOrbitalElements(r,v);
+
+%% 4.2.c)
+
+r = [-1; 0; 0];
+v = [0; 0; -3/2];
+
+[a ecc inc raan aop nu0 meanmotion M0] = getOrbitalElements(r,v);

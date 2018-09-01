@@ -1,0 +1,95 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      --><title>statedot_drag_events</title><meta name="generator" content="MATLAB 7.9"><meta name="date" content="2012-05-29"><meta name="m-file" content="statedot_drag_events"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="keyword">function</span> [value,isterminal,direction] = statedot_drag_events(t,state)
+<span class="comment">% Locate the time when height passes through zero in a</span>
+<span class="comment">% decreasing direction and stop integration.</span>
+
+r = state(1:3);
+DU = 6378.137;  <span class="comment">%km</span>
+
+value = norm(r)-DU;     <span class="comment">% Detect altitude = 0</span>
+isterminal = 1;   <span class="comment">% Stop the integration</span>
+direction = -1;   <span class="comment">% Negative direction only</span>
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Input argument "state" is undefined.
+
+Error in ==&gt; statedot_drag_events at 5
+r = state(1:3);
+</pre><p class="footer"><br>
+      Published with MATLAB&reg; 7.9<br></p></div><!--
+##### SOURCE BEGIN #####
+function [value,isterminal,direction] = statedot_drag_events(t,state)
+% Locate the time when height passes through zero in a 
+% decreasing direction and stop integration.
+
+r = state(1:3);
+DU = 6378.137;  %km
+
+value = norm(r)-DU;     % Detect altitude = 0
+isterminal = 1;   % Stop the integration
+direction = -1;   % Negative direction only
+end
+##### SOURCE END #####
+--></body></html>

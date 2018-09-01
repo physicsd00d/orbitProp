@@ -1,0 +1,29 @@
+%% Problem set 3
+clear all; close all; clc;
+
+%% 3.1.a.)
+
+%Stanford is located at
+geolat = 37.4226;   %[deg]
+lon = -122.1654;    %[deg]
+alt = -9/1E3;   %[km]
+
+[x y z] = Geodetic_To_ECEF(geolat, lon, alt)
+
+%% 3.1.b.)
+
+[gdlat lon alt] = ECEF_To_Geodetic(x, y, z)
+
+
+
+%% 3.2.a.)
+
+
+% from problem 3
+
+syms cosw sinw cosi sini cosO sinO
+R3w = [cosw sinw 0; -sinw cosw 0; 0 0 1]
+R1I = [1 0 0; 0 cosi sini; 0 -sini cosi]
+R3O = [cosO sinO 0; -sinO cosO 0; 0 0 1]
+
+rehCijk = R3w*R1I*R3O

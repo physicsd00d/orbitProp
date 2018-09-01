@@ -1,0 +1,15 @@
+function [x y z] = Geodetic_To_ECEF(geolat, lon, alt)
+
+R_equator = 6378.137;   %[km]
+ecc_Earth = 0.081819221456;
+
+Nlat = R_equator/sqrt(1-(ecc_Earth*sin(
+
+x = 2;
+y = 3;
+z = 5;
+
+
+
+
+end

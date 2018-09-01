@@ -1,0 +1,299 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      --><title>Hw7p3</title><meta name="generator" content="MATLAB 7.9"><meta name="date" content="2012-05-23"><meta name="m-file" content="Hw7p3"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Hw 7.3</a></li><li><a href="#2">Part b.)</a></li><li><a href="#3">Part c.)</a></li><li><a href="#4">Part d.) Plot the moon around the earth</a></li></ul></div><h2>Hw 7.3<a name="1"></a></h2><pre class="codeinput">clear <span class="string">all</span>; close <span class="string">all</span>; clc;
+</pre><h2>Part b.)<a name="2"></a></h2><pre class="codeinput">AU = 149597870.691;
+
+<span class="comment">%note that everything is currently in SI units</span>
+oneday = 3600*24;       <span class="comment">%[sec]</span>
+oneyear = 365*oneday;   <span class="comment">%[sec]</span>
+t_vec = 0:oneday:oneyear; <span class="comment">%one year, every day</span>
+
+fivebody_state0 = fivebody_initial();
+
+options = odeset(<span class="string">'RelTol'</span>, 1e-6, <span class="string">'AbsTol'</span>, 1e-9);
+[t_out, fivebody_state] = ode113(@statedot_fivebody, t_vec, fivebody_state0, options) ;
+
+<span class="comment">% extract the results from the state vector</span>
+r_sun = fivebody_state(:,1:3);
+v_sun = fivebody_state(:,4:6);
+r_mer = fivebody_state(:,7:9);
+v_mer = fivebody_state(:,10:12);
+r_ven = fivebody_state(:,13:15);
+v_ven = fivebody_state(:,16:18);
+r_ear = fivebody_state(:,19:21);
+v_ear = fivebody_state(:,22:24);
+r_moo = fivebody_state(:,25:27);
+v_moo = fivebody_state(:,28:30);
+
+
+figure(1)
+plot(r_sun(:,1)/AU,r_sun(:,2)/AU,<span class="string">'-o'</span>,r_mer(:,1)/AU,r_mer(:,2)/AU,<span class="keyword">...</span>
+    r_ven(:,1)/AU,r_ven(:,2)/AU,r_ear(:,1)/AU,r_ear(:,2)/AU,r_moo(:,1)/AU,r_moo(:,2)/AU)
+axis([-1.2 1.2 -1.2 1.2])
+axis <span class="string">equal</span>
+title(<span class="string">'Sun, Mercury, Venus, Earth, and Moon Orbit over one year'</span>)
+legend(<span class="string">'Sun'</span>,<span class="string">'Mercury'</span>,<span class="string">'Venus'</span>,<span class="string">'Earth'</span>,<span class="string">'Moon'</span>)
+xlabel(<span class="string">'x [AU]'</span>)
+ylabel(<span class="string">'y [AU]'</span>)
+</pre><img vspace="5" hspace="5" src="Hw7p3_01.png" alt=""> <h2>Part c.)<a name="3"></a></h2><pre class="codeinput">run(<span class="string">'/Users/marian/Documents/MATLAB/AA279/Hw7/Gravitation_Parameters.m'</span>);
+
+sum_of_mu = mu_sun + mu_mer + mu_ven + mu_ear + mu_moo;
+
+r_cm_init = (mu_sun*r_sun(1,1:3) + mu_mer*r_mer(1,1:3) + mu_ven*r_ven(1,1:3) +<span class="keyword">...</span>
+        mu_ear*r_ear(1,1:3) + mu_moo*r_moo(1,1:3))/sum_of_mu;
+
+r_cm_final = (mu_sun*r_sun(end,1:3) + mu_mer*r_mer(end,1:3) + mu_ven*r_ven(end,1:3) +<span class="keyword">...</span>
+        mu_ear*r_ear(end,1:3) + mu_moo*r_moo(end,1:3))/sum_of_mu;
+
+v_cm_init = (mu_sun*v_sun(1,1:3) + mu_mer*v_mer(1,1:3) + mu_ven*v_ven(1,1:3) +<span class="keyword">...</span>
+        mu_ear*v_ear(1,1:3) + mu_moo*v_moo(1,1:3))/sum_of_mu;
+
+v_cm_final = (mu_sun*v_sun(end,1:3) + mu_mer*v_mer(end,1:3) + mu_ven*v_ven(end,1:3) +<span class="keyword">...</span>
+        mu_ear*v_ear(end,1:3) + mu_moo*v_moo(end,1:3))/sum_of_mu;
+
+
+disp([<span class="string">'r_cm_initial [km]   = '</span> num2str(r_cm_init)])
+disp([<span class="string">'r_cm_final [km]     = '</span> num2str(r_cm_final)])
+disp([<span class="string">'|r_cm_initial| [AU] = '</span> num2str(norm(r_cm_init)/AU)])
+disp([<span class="string">'|r_cm_final| [AU]   = '</span> num2str(norm(r_cm_final)/AU)] )
+disp(<span class="string">' '</span>)
+disp([<span class="string">'v_cm_initial   = '</span> num2str(v_cm_init)])
+disp([<span class="string">'v_cm_final     = '</span> num2str(v_cm_final)])
+disp([<span class="string">'|v_cm_initial| = '</span> num2str(norm(v_cm_init))])
+disp([<span class="string">'|v_cm_final|   = '</span> num2str(norm(v_cm_final))] )
+
+<span class="comment">% It appears that the position of the center of mass is moving, however not</span>
+<span class="comment">% by much.  If our simulation had accounted for all of the mass in the</span>
+<span class="comment">% solar system, we would expect to see r_cm_init = r_cm_final = 0;</span>
+
+<span class="comment">% The velocity of the CM is constant, which is good because that means</span>
+<span class="comment">% our coordinate system is inertial.  Again, this would go to zero if we</span>
+<span class="comment">% accounted for all of the mass in the solar system, but even with only the</span>
+<span class="comment">% few bodies we've included here, the velocity of the CM is VERY SMALL.</span>
+</pre><pre class="codeoutput">r_cm_initial [km]   = -597452.8379     -10624.28087      2004.058243
+r_cm_final [km]     = -484134.5105     -332972.6658      52.17727033
+|r_cm_initial| [AU] = 0.0039944
+|r_cm_final| [AU]   = 0.0039278
+ 
+v_cm_initial   = 0.0035933   -0.010222 -6.1894e-05
+v_cm_final     = 0.0035933   -0.010222 -6.1894e-05
+|v_cm_initial| = 0.010835
+|v_cm_final|   = 0.010835
+</pre><h2>Part d.) Plot the moon around the earth<a name="4"></a></h2><pre class="codeinput">r_ear_moo = r_moo - r_ear;
+
+figure(2)
+plot(r_ear_moo(:,1)/AU,r_ear_moo(:,2)/AU)
+<span class="comment">% axis([-1.2 1.2 -1.2 1.2])</span>
+axis <span class="string">equal</span>
+title(<span class="string">'Moon around the Earth over one year'</span>)
+<span class="comment">% legend('Sun','Mercury','Venus','Earth','Moon')</span>
+xlabel(<span class="string">'x [AU]'</span>)
+ylabel(<span class="string">'y [AU]'</span>)
+
+
+<span class="comment">% How many times around?</span>
+
+<span class="comment">% returns angle [-180,180]</span>
+theta = atan2(r_ear_moo(:,2), r_ear_moo(:,1))*180/pi;
+
+<span class="comment">% convert to [0,360]</span>
+theta = (theta &gt;= 0).*theta + (theta &lt; 0).*(theta + 360);
+
+<span class="comment">% count how many times it rolls over</span>
+num_rollovers = sum([theta(2:end)-theta(1:end-1)] &lt; 0);
+
+<span class="comment">% find total degrees the moon went around</span>
+total_theta = num_rollovers*360 + theta(end) - theta(1);
+
+<span class="comment">% find total revolutions of the moon during this time period</span>
+num_revs = total_theta/360;
+
+disp([<span class="string">'Calculated number of revolutions = '</span> num2str(num_revs)])
+disp([<span class="string">'Which matches well with 365 days / period of moon = '</span> num2str(365/27.321582)])
+</pre><pre class="codeoutput">Calculated number of revolutions = 13.3907
+Which matches well with 365 days / period of moon = 13.3594
+</pre><img vspace="5" hspace="5" src="Hw7p3_02.png" alt=""> <p class="footer"><br>
+      Published with MATLAB&reg; 7.9<br></p></div><!--
+##### SOURCE BEGIN #####
+%% Hw 7.3
+clear all; close all; clc;
+
+%% Part b.)
+
+AU = 149597870.691;
+
+%note that everything is currently in SI units
+oneday = 3600*24;       %[sec]
+oneyear = 365*oneday;   %[sec]
+t_vec = 0:oneday:oneyear; %one year, every day
+
+fivebody_state0 = fivebody_initial();
+
+options = odeset('RelTol', 1e-6, 'AbsTol', 1e-9);
+[t_out, fivebody_state] = ode113(@statedot_fivebody, t_vec, fivebody_state0, options) ;
+
+% extract the results from the state vector
+r_sun = fivebody_state(:,1:3);
+v_sun = fivebody_state(:,4:6);
+r_mer = fivebody_state(:,7:9);
+v_mer = fivebody_state(:,10:12);
+r_ven = fivebody_state(:,13:15);
+v_ven = fivebody_state(:,16:18);
+r_ear = fivebody_state(:,19:21);
+v_ear = fivebody_state(:,22:24);
+r_moo = fivebody_state(:,25:27);
+v_moo = fivebody_state(:,28:30);
+
+
+figure(1)
+plot(r_sun(:,1)/AU,r_sun(:,2)/AU,'-o',r_mer(:,1)/AU,r_mer(:,2)/AU,...
+    r_ven(:,1)/AU,r_ven(:,2)/AU,r_ear(:,1)/AU,r_ear(:,2)/AU,r_moo(:,1)/AU,r_moo(:,2)/AU)
+axis([-1.2 1.2 -1.2 1.2])
+axis equal
+title('Sun, Mercury, Venus, Earth, and Moon Orbit over one year')
+legend('Sun','Mercury','Venus','Earth','Moon')
+xlabel('x [AU]')
+ylabel('y [AU]')
+
+
+%% Part c.)
+
+run('/Users/marian/Documents/MATLAB/AA279/Hw7/Gravitation_Parameters.m');
+
+sum_of_mu = mu_sun + mu_mer + mu_ven + mu_ear + mu_moo;
+
+r_cm_init = (mu_sun*r_sun(1,1:3) + mu_mer*r_mer(1,1:3) + mu_ven*r_ven(1,1:3) +...
+        mu_ear*r_ear(1,1:3) + mu_moo*r_moo(1,1:3))/sum_of_mu;
+    
+r_cm_final = (mu_sun*r_sun(end,1:3) + mu_mer*r_mer(end,1:3) + mu_ven*r_ven(end,1:3) +...
+        mu_ear*r_ear(end,1:3) + mu_moo*r_moo(end,1:3))/sum_of_mu;
+
+v_cm_init = (mu_sun*v_sun(1,1:3) + mu_mer*v_mer(1,1:3) + mu_ven*v_ven(1,1:3) +...
+        mu_ear*v_ear(1,1:3) + mu_moo*v_moo(1,1:3))/sum_of_mu;
+    
+v_cm_final = (mu_sun*v_sun(end,1:3) + mu_mer*v_mer(end,1:3) + mu_ven*v_ven(end,1:3) +...
+        mu_ear*v_ear(end,1:3) + mu_moo*v_moo(end,1:3))/sum_of_mu;
+
+
+disp(['r_cm_initial [km]   = ' num2str(r_cm_init)])
+disp(['r_cm_final [km]     = ' num2str(r_cm_final)])
+disp(['|r_cm_initial| [AU] = ' num2str(norm(r_cm_init)/AU)])
+disp(['|r_cm_final| [AU]   = ' num2str(norm(r_cm_final)/AU)] )
+disp(' ')
+disp(['v_cm_initial   = ' num2str(v_cm_init)])
+disp(['v_cm_final     = ' num2str(v_cm_final)])
+disp(['|v_cm_initial| = ' num2str(norm(v_cm_init))])
+disp(['|v_cm_final|   = ' num2str(norm(v_cm_final))] )
+
+% It appears that the position of the center of mass is moving, however not
+% by much.  If our simulation had accounted for all of the mass in the
+% solar system, we would expect to see r_cm_init = r_cm_final = 0;
+
+% The velocity of the CM is constant, which is good because that means
+% our coordinate system is inertial.  Again, this would go to zero if we
+% accounted for all of the mass in the solar system, but even with only the
+% few bodies we've included here, the velocity of the CM is VERY SMALL.
+
+
+%% Part d.) Plot the moon around the earth
+
+r_ear_moo = r_moo - r_ear;
+
+figure(2)
+plot(r_ear_moo(:,1)/AU,r_ear_moo(:,2)/AU)
+% axis([-1.2 1.2 -1.2 1.2])
+axis equal
+title('Moon around the Earth over one year')
+% legend('Sun','Mercury','Venus','Earth','Moon')
+xlabel('x [AU]')
+ylabel('y [AU]')
+
+
+% How many times around?
+
+% returns angle [-180,180]
+theta = atan2(r_ear_moo(:,2), r_ear_moo(:,1))*180/pi;
+
+% convert to [0,360]
+theta = (theta >= 0).*theta + (theta < 0).*(theta + 360);
+
+% count how many times it rolls over
+num_rollovers = sum([theta(2:end)-theta(1:end-1)] < 0);
+
+% find total degrees the moon went around
+total_theta = num_rollovers*360 + theta(end) - theta(1);
+
+% find total revolutions of the moon during this time period
+num_revs = total_theta/360;
+
+disp(['Calculated number of revolutions = ' num2str(num_revs)])
+disp(['Which matches well with 365 days / period of moon = ' num2str(365/27.321582)])
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>

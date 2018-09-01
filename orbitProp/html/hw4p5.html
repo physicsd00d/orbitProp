@@ -1,0 +1,357 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      --><title>hw4p5</title><meta name="generator" content="MATLAB 7.9"><meta name="date" content="2012-05-02"><meta name="m-file" content="hw4p5"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">4.5.a)</a></li><li><a href="#3">4.5.b)</a></li><li><a href="#4">4.5.c)</a></li><li><a href="#5">4.5.d)</a></li></ul></div><pre class="codeinput"><span class="comment">% Hw4.5</span>
+close <span class="string">all</span>; clear <span class="string">all</span>; clc;
+</pre><h2>4.5.a)<a name="2"></a></h2><pre class="codeinput">DU = 6378.137;  <span class="comment">%km</span>
+TU = 806.80415; <span class="comment">%sec</span>
+VU = DU/TU;
+
+<span class="comment">% Earth physical constants from Vallado</span>
+muearth = 398600.4418;              <span class="comment">% [km^3/sec^2]</span>
+reearth =   DU;               <span class="comment">% [km] mean equatorial radius</span>
+rotEarthRad = 0.0000729211585530;  <span class="comment">% [rad/sec]</span>
+rotEarthDay = 1.0027379093;  <span class="comment">%rev/day</span>
+rotEarthDay = rotEarthRad*3600*24/(2*pi);
+e2earth =      0.006694385000;      <span class="comment">% oblate eccentricity squared</span>
+
+<span class="comment">% Greenwich Sidereal Time at 0000h 1 January 2012 UTC</span>
+<span class="comment">% from US Naval Observatory website</span>
+gst2012start = 6.6706801; <span class="comment">% [sidereal hours] from vernal equinox</span>
+
+<span class="comment">%convert to rad</span>
+gst2012start = gst2012start * 2*pi/24;    <span class="comment">%[rad]</span>
+
+<span class="comment">%tracking station information</span>
+track_lon = -(110 + 52/60 + 42/3600);   <span class="comment">%deg</span>
+track_lat = 31 + 40/60 + 52/3600;       <span class="comment">%deg</span>
+track_alt = 2.577;                      <span class="comment">%km</span>
+track_UTC_offset = 7;       <span class="comment">%hours behind UTC</span>
+
+track_lon = track_lon *pi/180;          <span class="comment">%convert to rad</span>
+track_lat = track_lat *pi/180;          <span class="comment">%convert to rad</span>
+
+
+<span class="comment">%data collected from tracking station</span>
+time_obs = UTC_time(9,4,2012,18,54,0,track_UTC_offset);
+rho = 39899.01730557;               <span class="comment">%km</span>
+Az = 89.78381848      *pi/180;      <span class="comment">%rad</span>
+El = 63.65779556      *pi/180;      <span class="comment">%rad</span>
+rho_dot = 0.59337565;               <span class="comment">%km/s</span>
+Az_dot = -0.00630053  *pi/180;      <span class="comment">%rad/s</span>
+El_dot = 0.00299054   *pi/180;      <span class="comment">%rad/s</span>
+
+<span class="comment">% %data for checking purposes.  CHECK WORKS!!!</span>
+<span class="comment">% rho = 35100; %[km]</span>
+<span class="comment">% Az = 180*pi/180; % [rad]</span>
+<span class="comment">% El = 55*pi/180; % [rad]</span>
+<span class="comment">% rho_dot = 0; % [km/sec]</span>
+<span class="comment">% Az_dot = 0*pi/180; % [rad/sec]</span>
+<span class="comment">% El_dot = 0*pi/180; % [rad/sec]</span>
+
+
+<span class="comment">%find R and V from these measurements in SEZ frame</span>
+a_R_s__sez = [-rho*cos(Az)*cos(El);
+               rho*sin(Az)*cos(El);
+               rho*sin(El)];
+
+sez_V_s__sez = <span class="keyword">...</span>
+    [-rho_dot*cos(Az)*cos(El) + rho*sin(Az)*Az_dot*cos(El) + rho*cos(Az)*sin(El)*El_dot;
+      rho_dot*sin(Az)*cos(El) + rho*cos(Az)*Az_dot*cos(El) - rho*sin(Az)*sin(El)*El_dot;
+      rho_dot*sin(El) + rho*cos(El)*El_dot];
+
+<span class="comment">%Express ground station in ECEF</span>
+
+o_R_a__ecef = Geodetic_To_ECEF(track_lat, track_lon, track_alt);
+
+ecef__C__sez = <span class="keyword">...</span>
+    [sin(track_lat)*cos(track_lon), -sin(track_lon), cos(track_lat)*cos(track_lon);
+     sin(track_lat)*sin(track_lon),  cos(track_lon), cos(track_lat)*sin(track_lon);
+    -cos(track_lat),                 0,              sin(track_lat)];
+
+eci_omega_ecef__eci = [0; 0; rotEarthRad];
+
+<span class="comment">% Find angle of Greenwich meridian from vernal equinox [0, 2*pi)</span>
+<span class="comment">% theta_g = mod(gst2012start + rotEarthDay*(time_obs - 1)*2*pi,2*pi);</span>
+theta_g = siderealTime(time_obs);
+
+<span class="comment">% Convert ECI coordinates to ECEF coordinates</span>
+eci__C__ecef = [cos(theta_g) -sin(theta_g) 0; sin(theta_g) cos(theta_g) 0; 0 0 1];
+
+<span class="comment">% Calculate inertial R</span>
+o_R_s__eci = eci__C__ecef*(o_R_a__ecef + ecef__C__sez*a_R_s__sez)
+
+eci_V_s__eci = eci__C__ecef*ecef__C__sez*sez_V_s__sez + cross(eci_omega_ecef__eci,o_R_s__eci)
+</pre><pre class="codeoutput">
+o_R_s__eci =
+
+   1.0e+04 *
+
+   -3.1756
+    2.4261
+    2.2167
+
+
+eci_V_s__eci =
+
+   -0.4232
+   -1.4048
+    2.4162
+
+</pre><h2>4.5.b)<a name="3"></a></h2><pre class="codeinput"><span class="comment">%convert to canonical units</span>
+r = o_R_s__eci/DU;
+v = eci_V_s__eci/VU;
+
+[a ecc inc raan aop nu0 meanmotion M0] = getOrbitalElements(r,v);
+
+<span class="comment">%convert back from canonical units</span>
+a = a*DU;
+meanmotion = meanmotion* (1/TU) * (1/(2*pi)) * 60*60*24; <span class="comment">%rev/day</span>
+
+disp([<span class="string">'a = '</span> num2str(a) <span class="string">' km'</span>])
+disp([<span class="string">'e = '</span> num2str(ecc)])
+disp([<span class="string">'i = '</span> num2str(inc*180/pi) <span class="string">' deg'</span>])
+disp([<span class="string">'raan = '</span> num2str(raan*180/pi) <span class="string">' deg'</span>])
+disp([<span class="string">'aop = '</span> num2str(aop*180/pi) <span class="string">' deg'</span>])
+disp([<span class="string">'nu0 = '</span> num2str(nu0*180/pi) <span class="string">' deg'</span>])
+disp([<span class="string">'n = '</span> num2str(meanmotion) <span class="string">' rev/day'</span>])
+disp([<span class="string">'M0 = '</span> num2str(M0*180/pi) <span class="string">' deg'</span>])
+</pre><pre class="codeoutput">a = 42161.7444 km
+e = 0.26743
+i = 63.9396 deg
+raan = 126.8815 deg
+aop = 270.256 deg
+nu0 = 122.4252 deg
+n = 1.0028 rev/day
+M0 = 93.7367 deg
+</pre><h2>4.5.c)<a name="4"></a></h2><pre class="codeinput">disp(<span class="string">'This orbit is: direct, elliptical, inclined, geosynchronous'</span>)
+</pre><pre class="codeoutput">This orbit is: direct, elliptical, inclined, geosynchronous
+</pre><h2>4.5.d)<a name="5"></a></h2><pre class="codeinput">path(path,<span class="string">'Hw3'</span>)
+
+orbitalElements.a = a;
+orbitalElements.e = ecc;
+orbitalElements.i = inc;
+orbitalElements.raan = raan;
+orbitalElements.omega = aop;
+orbitalElements.nu0 = nu0;
+orbitalElements.n = meanmotion;
+orbitalElements.M0 = M0;
+orbitalElements.t0 = time_obs;
+
+startTime = UTC_time(1,5,2012,0,0,0,0);
+stopTime = startTime + 1;
+
+plotOrbit(orbitalElements, startTime, stopTime, 1)
+</pre><img vspace="5" hspace="5" src="hw4p5_01.png" alt=""> <img vspace="5" hspace="5" src="hw4p5_02.png" alt=""> <img vspace="5" hspace="5" src="hw4p5_03.png" alt=""> <p class="footer"><br>
+      Published with MATLAB&reg; 7.9<br></p></div><!--
+##### SOURCE BEGIN #####
+% Hw4.5
+close all; clear all; clc;
+
+%% 4.5.a)
+
+DU = 6378.137;  %km
+TU = 806.80415; %sec
+VU = DU/TU;
+
+% Earth physical constants from Vallado
+muearth = 398600.4418;              % [km^3/sec^2]
+reearth =   DU;               % [km] mean equatorial radius
+rotEarthRad = 0.0000729211585530;  % [rad/sec]
+rotEarthDay = 1.0027379093;  %rev/day
+rotEarthDay = rotEarthRad*3600*24/(2*pi);
+e2earth =      0.006694385000;      % oblate eccentricity squared
+
+% Greenwich Sidereal Time at 0000h 1 January 2012 UTC
+% from US Naval Observatory website
+gst2012start = 6.6706801; % [sidereal hours] from vernal equinox
+
+%convert to rad
+gst2012start = gst2012start * 2*pi/24;    %[rad]
+
+%tracking station information
+track_lon = -(110 + 52/60 + 42/3600);   %deg
+track_lat = 31 + 40/60 + 52/3600;       %deg
+track_alt = 2.577;                      %km
+track_UTC_offset = 7;       %hours behind UTC
+
+track_lon = track_lon *pi/180;          %convert to rad
+track_lat = track_lat *pi/180;          %convert to rad
+
+
+%data collected from tracking station
+time_obs = UTC_time(9,4,2012,18,54,0,track_UTC_offset);
+rho = 39899.01730557;               %km
+Az = 89.78381848      *pi/180;      %rad
+El = 63.65779556      *pi/180;      %rad
+rho_dot = 0.59337565;               %km/s
+Az_dot = -0.00630053  *pi/180;      %rad/s
+El_dot = 0.00299054   *pi/180;      %rad/s
+
+% %data for checking purposes.  CHECK WORKS!!!
+% rho = 35100; %[km]
+% Az = 180*pi/180; % [rad]
+% El = 55*pi/180; % [rad]
+% rho_dot = 0; % [km/sec]
+% Az_dot = 0*pi/180; % [rad/sec]
+% El_dot = 0*pi/180; % [rad/sec]
+
+
+%find R and V from these measurements in SEZ frame
+a_R_s__sez = [-rho*cos(Az)*cos(El);
+               rho*sin(Az)*cos(El);
+               rho*sin(El)];
+           
+sez_V_s__sez = ...
+    [-rho_dot*cos(Az)*cos(El) + rho*sin(Az)*Az_dot*cos(El) + rho*cos(Az)*sin(El)*El_dot;
+      rho_dot*sin(Az)*cos(El) + rho*cos(Az)*Az_dot*cos(El) - rho*sin(Az)*sin(El)*El_dot;
+      rho_dot*sin(El) + rho*cos(El)*El_dot];
+
+%Express ground station in ECEF
+
+o_R_a__ecef = Geodetic_To_ECEF(track_lat, track_lon, track_alt);
+
+ecef__C__sez = ...
+    [sin(track_lat)*cos(track_lon), -sin(track_lon), cos(track_lat)*cos(track_lon);
+     sin(track_lat)*sin(track_lon),  cos(track_lon), cos(track_lat)*sin(track_lon);
+    -cos(track_lat),                 0,              sin(track_lat)];
+
+eci_omega_ecef__eci = [0; 0; rotEarthRad];
+
+% Find angle of Greenwich meridian from vernal equinox [0, 2*pi)
+% theta_g = mod(gst2012start + rotEarthDay*(time_obs - 1)*2*pi,2*pi);
+theta_g = siderealTime(time_obs);
+
+% Convert ECI coordinates to ECEF coordinates
+eci__C__ecef = [cos(theta_g) -sin(theta_g) 0; sin(theta_g) cos(theta_g) 0; 0 0 1];
+
+% Calculate inertial R
+o_R_s__eci = eci__C__ecef*(o_R_a__ecef + ecef__C__sez*a_R_s__sez)
+
+eci_V_s__eci = eci__C__ecef*ecef__C__sez*sez_V_s__sez + cross(eci_omega_ecef__eci,o_R_s__eci)
+
+%% 4.5.b)
+%convert to canonical units
+r = o_R_s__eci/DU;
+v = eci_V_s__eci/VU;
+
+[a ecc inc raan aop nu0 meanmotion M0] = getOrbitalElements(r,v);
+
+%convert back from canonical units
+a = a*DU;
+meanmotion = meanmotion* (1/TU) * (1/(2*pi)) * 60*60*24; %rev/day
+
+disp(['a = ' num2str(a) ' km'])
+disp(['e = ' num2str(ecc)])
+disp(['i = ' num2str(inc*180/pi) ' deg'])
+disp(['raan = ' num2str(raan*180/pi) ' deg'])
+disp(['aop = ' num2str(aop*180/pi) ' deg'])
+disp(['nu0 = ' num2str(nu0*180/pi) ' deg'])
+disp(['n = ' num2str(meanmotion) ' rev/day'])
+disp(['M0 = ' num2str(M0*180/pi) ' deg'])
+
+
+%% 4.5.c)
+
+disp('This orbit is: direct, elliptical, inclined, geosynchronous')
+
+%% 4.5.d)
+
+path(path,'Hw3')
+
+orbitalElements.a = a;
+orbitalElements.e = ecc;
+orbitalElements.i = inc;
+orbitalElements.raan = raan;
+orbitalElements.omega = aop;
+orbitalElements.nu0 = nu0;
+orbitalElements.n = meanmotion;
+orbitalElements.M0 = M0;
+orbitalElements.t0 = time_obs;
+
+startTime = UTC_time(1,5,2012,0,0,0,0);
+stopTime = startTime + 1;
+
+plotOrbit(orbitalElements, startTime, stopTime, 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,55 @@
+function [p ecc inc raan aop nu0] = getOrbitalElements(r, v)
+%canonical units and column vectors please
+
+h = cross(r,v);
+
+p = norm(h)^2;
+
+ecc_vec = (norm(v)^2 - 1/norm(r))*r - dot(r,v)*v;
+
+ecc = norm(ecc_vec);
+
+if (ecc == 0)
+    disp('Do Something about circular orbit')
+end
+
+a = p/(1-ecc^2);
+
+meanmotion = (1/a)^(-1.5);
+
+inc = acos(h(3)/norm(h));
+
+if (inc == 0)
+    disp('Do Something about equatorial orbit')
+elseif (inc == pi)
+    disp('Do Something about polar orbit')
+end
+
+n_vec = cross([0; 0; 1],h);
+
+raan = acos(n_vec(1)/norm(n_vec));
+if (n_vec(2) < 0)
+    raan = 2*pi - raan;
+end
+
+aop = acos(dot(n_vec,ecc_vec)/(norm(n_vec)*ecc));
+if (ecc_vec(3) < 0)
+    aop = 2*pi - aop;
+end
+
+disp('here')
+dot(ecc_vec,r)/(ecc*norm(r))
+
+nu0 = acos(dot(ecc_vec,r)/(ecc*norm(r)));
+if (dot(r,v) < 0)
+    nu0 = 2*pi - nu0;
+end
+
+num = ecc + cos(nu0);
+den = 1 + ecc*cos(nu0);
+EccAnom0 = acos(num/den);
+
+M0 = EccAnom0 - ecc*sin(EccAnom0);
+    
+
+end

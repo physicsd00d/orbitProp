@@ -1,0 +1,28 @@
+function plotOrbit(orbitalElements, startTime, stopTime, figNum)
+%year is assumed to be 2012
+
+a = orbitalElements.a;
+ecc = orbitalElements.e;
+inc = orbitalElements.i;
+raan = orbitalElements.raan;
+omega = orbitalElements.omega;
+nu0 = orbitalElements.nu0;
+n = orbitalElements.n;
+M0 = orbitalElements.M0;
+t0 = orbitalElements.t0;
+
+if (ecc == 1)
+    error('not designed for parabolic orbits yet')
+else
+    
+
+
+
+
+
+
+
+
+
+
+end

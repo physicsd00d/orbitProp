@@ -1,0 +1,79 @@
+%% Hw6.3
+clear all; close all; clc; format long;
+
+%% Part a.)
+tau_gs = 86164; %s      geostationary period
+mu_earth = 398600.4418; %km^3/s^2
+DU = 6378.137;
+
+% Start in circular parking orbit, inc = 51.6 degrees
+r0 = 200 + DU;
+v0_minus = sqrt(mu_earth/r0);
+
+% Burn to raise apogee to 7,000km height, inc = 50.0 deg (Orbit 1)
+r1 = 7000 + DU;
+
+v0_plus = sqrt(2*mu_earth*(1/r0 - 1/(r0+r1)));
+delta_inc0 = 50.0 - 51.6;
+
+delta_v0 = sqrt(v0_minus^2 + v0_plus^2 - 2*v0_minus*v0_plus*cosd(delta_inc0));
+disp(['Parking Orbit to Orbit #1 delta_V = ' num2str(delta_v0) ' km/s'])
+
+
+% Burn at perigee, to raise apogee to geostationary, inc = 48.8 (Orbit 2)
+r2 = ((tau_gs/(2*pi))^2 * mu_earth)^(1/3);
+
+v1_minus = v0_plus;
+v1_plus = sqrt(2*mu_earth*(1/r0 - 1/(r0+r2)));
+delta_inc1 = 48.8-50.0;
+
+delta_v1 = sqrt(v1_minus^2 + v1_plus^2 - 2*v1_minus*v1_plus*cosd(delta_inc1));
+disp(['Orbit #1 to Orbit #2 delta_V      = ' num2str(delta_v1) ' km/s'])
+
+
+% Burn at apogee to raise perigee to 5500km height, inc = 20.4 (Orbit 3)
+r3 = 5500 + DU;
+
+    % At apogee of orbit (r2), before burn, semi-major = r0+r2
+v2_minus = sqrt(2*mu_earth*(1/r2 - 1/(r0+r2)));
+    % At apogee of orbit (r2), after burn, semi-major = r2+r3
+v2_plus = sqrt(2*mu_earth*(1/r2 - 1/(r2+r3)));
+
+delta_inc2 = 20.4 - 48.8;
+
+delta_v2 = sqrt(v2_minus^2 + v2_plus^2 - 2*v2_minus*v2_plus*cosd(delta_inc2));
+disp(['Orbit #2 to Orbit #3 delta_V      = ' num2str(delta_v2) ' km/s'])
+
+
+% Burn at apogee to raise perigee to Geo, inc = 0.0 deg (GeoStationary)
+r4 = r2;
+
+v3_minus = v2_plus;
+v3_plus = sqrt(mu_earth/r4);
+
+delta_inc3 = 0.0 - 20.4;
+
+delta_v3 = sqrt(v3_minus^2 + v3_plus^2 - 2*v3_minus*v3_plus*cosd(delta_inc3));
+disp(['Orbit #3 to Geostationary delta_V = ' num2str(delta_v3) ' km/s'])
+
+
+% Add them all together
+delta_V = delta_v0 + delta_v1 + delta_v2 + delta_v3;
+disp(['Total delta_V                     = ' num2str(delta_V) ' km/s'])
+
+%% Part b.)
+
+tau_01 = 2*pi*sqrt((r0 + r1)^3/(8*mu_earth));
+tau_12 = pi*sqrt((r0 + r2)^3/(8*mu_earth));
+tau_23 = 2*pi*sqrt((r3 + r2)^3/(8*mu_earth));
+% tau_34 = pi*sqrt((r4 + r2)^3/(8*mu_earth));
+
+disp(['Transfer from Parking to Orbit #1  = ' num2str(tau_01/3600) ' hours']) 
+disp(['Transfer from Orbit #1 to Orbit #2 = ' num2str(tau_12/3600) ' hours']) 
+disp(['Transfer from Orbit #2 to Orbit #3 = ' num2str(tau_23/3600) ' hours']) 
+disp(['Total time spent in transfers      = ' num2str((tau_01 + tau_12 + tau_23)/3600) ' hours']) 
+
+
+
+
+
